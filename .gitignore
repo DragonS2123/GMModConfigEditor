@@ -6,3 +6,5 @@ publish/
 *.user
 .vs/
 "@ | Out-File -Encoding UTF8 .gitignore
+*.exe
+publish/
