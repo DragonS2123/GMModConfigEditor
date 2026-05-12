@@ -1,0 +1,123 @@
+<Window x:Class="GMCraftTableEditor.GmConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="GM Config Editor"
+        Height="720"
+        Width="1200"
+        Background="{DynamicResource AppBackground}"
+        Foreground="{DynamicResource TextBrush}"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderBrushSoft}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="12"
+                Margin="0,0,0,12">
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Открыть GM_CRAFTTABLE_CONFIG" Width="220" Click="OpenCraftConfig_Click"/>
+                <Button Content="Сохранить GM_CRAFTTABLE_CONFIG" Width="240" Click="SaveCraftConfig_Click"/>
+                <Button Content="Открыть GM_ACCESS_CONFIG" Width="220" Click="OpenAccessConfig_Click"/>
+                <Button Content="Сохранить GM_ACCESS_CONFIG" Width="220" Click="SaveAccessConfig_Click"/>
+            </StackPanel>
+        </Border>
+
+        <TabControl Grid.Row="1"
+                    Background="{DynamicResource AppBackground}"
+                    Foreground="{DynamicResource TextBrush}">
+            <TabItem Header="Категории">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+ Добавить категорию"
+                                Background="{DynamicResource AccentBrush}"
+                                Width="170"
+                                Click="AddCategory_Click"/>
+
+                        <Button Content="Удалить категорию"
+                                Background="{DynamicResource DangerBrush}"
+                                Width="160"
+                                Click="DeleteCategory_Click"/>
+                    </StackPanel>
+
+                    <DataGrid x:Name="CategoriesGrid"
+                      Grid.Row="1"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Столы">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+ Добавить стол"
+                                Background="{DynamicResource AccentBrush}"
+                                Width="150"
+                                Click="AddCraftTable_Click"/>
+
+                        <Button Content="Удалить стол"
+                                Background="{DynamicResource DangerBrush}"
+                                Width="140"
+                                Click="DeleteCraftTable_Click"/>
+                    </StackPanel>
+
+                    <DataGrid x:Name="CraftTablesGrid"
+                              Grid.Row="1"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Админы">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox x:Name="AdminIdText"
+                                 Width="300"
+                                 Margin="0,0,10,0"/>
+
+                        <Button Content="+ Добавить админа"
+                                Background="{DynamicResource AccentBrush}"
+                                Width="160"
+                                Click="AddAdminId_Click"/>
+
+                        <Button Content="Удалить админа"
+                                Background="{DynamicResource DangerBrush}"
+                                Width="150"
+                                Click="DeleteAdminId_Click"/>
+                    </StackPanel>
+
+                    <ListBox x:Name="AdminIdsList"
+                             Grid.Row="1"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <TextBlock x:Name="StatusText"
+                   Grid.Row="2"
+                   Margin="0,10,0,0"
+                   Foreground="{DynamicResource TextBrush}"
+                   Text="Готово"/>
+    </Grid>
+</Window>

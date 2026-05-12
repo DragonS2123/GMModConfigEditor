@@ -1,0 +1,10 @@
+# В папке проекта
+@"
+obj/
+bin/
+publish/
+*.user
+.vs/
+"@ | Out-File -Encoding UTF8 .gitignore
+*.exe
+publish/

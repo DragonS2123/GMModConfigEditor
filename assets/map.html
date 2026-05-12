@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>GM Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; background:#1a1a1a; }
+  #map { width:100%; height:100%; }
+
+  /* Стиль попапов */
+  .leaflet-popup-content-wrapper {
+    background:#1e1e1e; color:#e0e0e0;
+    border:1px solid #444; border-radius:6px;
+  }
+  .leaflet-popup-tip { background:#1e1e1e; }
+  .leaflet-popup-content { margin:10px 14px; font-size:13px; line-height:1.5; }
+  .leaflet-popup-content b { color:#fff; font-size:14px; }
+  .leaflet-popup-content code {
+    background:#111; padding:2px 6px; border-radius:3px;
+    font-family:monospace; color:#7ec8e3;
+  }
+
+  /* Кастомные маркеры */
+  .gm-pin {
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,0.85);
+    box-shadow:0 2px 8px rgba(0,0,0,0.9);
+    cursor:pointer;
+    transition:transform 0.1s;
+  }
+  .gm-pin:hover { transform:scale(1.4); }
+  .gm-pin.npc     { background:#159A8C; }
+  .gm-pin.trigger { background:#E57C00; }
+  .gm-pin.rock    { background:#8A95A3; }
+  .gm-pin.custom  { background:#F0C040; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+// ══════════════════════════════════════════════════════════════
+// GM Mod Config Editor — Встроенная карта DayZ
+// Координаты: DayZ X = Leaflet lng, DayZ Z = Leaflet lat
+// CRS.Simple: 1 единица = 1 метр на карте
+// ══════════════════════════════════════════════════════════════
+
+// Конфигурация карт
+const MAP_CONFIGS = {
+  chernarusplus: {
+    name:      'Chernarus+',
+    size:      15360,
+    tileUrl:   'https://static.xam.nu/dayz/maps/chernarusplus/1.27/topographic/{z}/{x}/{y}.webp',
+    maxZoom:   7,
+    minZoom:   2,
+    center:    [7680, 7680],
+  },
+  livonia: {
+    name:      'Livonia',
+    size:      8192,
+    tileUrl:   'https://static.xam.nu/dayz/maps/livonia/1.25/topographic/{z}/{x}/{y}.webp',
+    maxZoom:   7,
+    minZoom:   2,
+    center:    [4096, 4096],
+  },
+  sakhal: {
+    name:      'Sakhal',
+    size:      8192,
+    tileUrl:   'https://static.xam.nu/dayz/maps/sakhal/1.26/topographic/{z}/{x}/{y}.webp',
+    maxZoom:   7,
+    minZoom:   2,
+    center:    [4096, 4096],
+  },
+};
+
+let map = null;
+let tileLayer = null;
+let currentCfg = null;
+let markers = [];
+
+// ── Инициализация карты ──────────────────────────────────────
+
+function initMap(mapKey, cfg) {
+  currentCfg = cfg;
+  const size = cfg.size;
+
+  // CRS.Simple — прямое соответствие DayZ координат
+  const crs = L.extend({}, L.CRS.Simple, {
+    // Ось Y в DayZ идёт с юга на север, в Leaflet — наоборот
+    // Инвертируем: latLng(z, x) где z — ось юг-север
+  });
+
+  if (map) {
+    map.remove();
+    map = null;
+  }
+
+  // Bounds: [0,0] до [size, size]
+  // Leaflet CRS.Simple: lat = Y (Z в DayZ), lng = X
+  const bounds = [[0, 0], [size, size]];
+
+  map = L.map('map', {
+    crs:         L.CRS.Simple,
+    minZoom:     cfg.minZoom,
+    maxZoom:     cfg.maxZoom,
+    zoomControl: true,
+  });
+
+  // Тайлы с xam.nu
+  tileLayer = L.tileLayer(cfg.tileUrl, {
+    tms:         true,        // xam.nu использует TMS (y инвертирован)
+    attribution: '© dayz.xam.nu',
+    noWrap:      true,
+    bounds:      bounds,
+  }).addTo(map);
+
+  // Устанавливаем вид на центр карты
+  map.setView([cfg.center[1], cfg.center[0]], cfg.minZoom + 1);
+
+  // Треккинг мыши → координаты
+  map.on('mousemove', function(e) {
+    const x = e.latlng.lng;
+    const z = e.latlng.lat;
+    window.chrome.webview.postMessage(
+      JSON.stringify({ type:'coords', x: x, z: z })
+    );
+  });
+
+  // Клик по карте → координаты в статус
+  map.on('click', function(e) {
+    window.chrome.webview.postMessage(
+      JSON.stringify({ type:'click', x: e.latlng.lng, z: e.latlng.lat })
+    );
+  });
+
+  window.chrome.webview.postMessage(JSON.stringify({ type:'ready', map: mapKey }));
+}
+
+// ── Конвертация координат ────────────────────────────────────
+// DayZ: X = восток, Y = высота (не нужна), Z = север
+// Leaflet CRS.Simple: lat = Z (север), lng = X (восток)
+
+function dayzToLatLng(x, z) {
+  return L.latLng(z, x);
+}
+
+// ── Маркеры ──────────────────────────────────────────────────
+
+function clearMarkers() {
+  markers.forEach(m => { try { m.remove(); } catch(e){} });
+  markers = [];
+}
+
+function addMarkers(data) {
+  clearMarkers();
+  data.forEach(function(md) {
+    const latlng = dayzToLatLng(md.x, md.z);
+
+    const pin = document.createElement('div');
+    pin.className = `gm-pin ${md.type}`;
+    pin.style.width  = md.type === 'custom' ? '16px' : '12px';
+    pin.style.height = md.type === 'custom' ? '16px' : '12px';
+
+    const icon = L.divIcon({
+      html:      pin.outerHTML,
+      className: '',
+      iconSize:  [12, 12],
+      iconAnchor:[6, 6],
+    });
+
+    const popup = `
+      <b>${md.label}</b><br>
+      <span style="color:#888;font-size:11px">${md.type}</span><br>
+      <code>X: ${md.x.toFixed(1)} &nbsp; Z: ${md.z.toFixed(1)}</code>
+      ${md.extra ? `<br><small style="color:#aaa">${md.extra}</small>` : ''}
+    `;
+
+    const m = L.marker(latlng, { icon })
+      .bindPopup(popup, { maxWidth: 260 })
+      .addTo(map);
+
+    markers.push(m);
+  });
+
+  window.chrome.webview.postMessage(
+    JSON.stringify({ type:'markersAdded', count: markers.length })
+  );
+}
+
+// ── Навигация к позиции ──────────────────────────────────────
+
+function gotoPosition(x, z, zoom, label) {
+  const latlng = dayzToLatLng(x, z);
+  map.setView(latlng, zoom || 5);
+
+  if (label) {
+    // Временный маркер цели
+    const icon = L.divIcon({
+      html: '<div class="gm-pin custom" style="width:16px;height:16px"></div>',
+      className:'', iconSize:[16,16], iconAnchor:[8,8]
+    });
+    const m = L.marker(latlng, { icon })
+      .bindPopup(`<b>${label}</b><br><code>X:${x.toFixed(1)} Z:${z.toFixed(1)}</code>`)
+      .addTo(map)
+      .openPopup();
+    markers.push(m);
+  }
+}
+
+// ── API для C# ───────────────────────────────────────────────
+// C# вызывает эти функции через ExecuteScriptAsync
+
+window.GM = {
+  loadMap:      (key, cfgJson) => initMap(key, cfgJson ? JSON.parse(cfgJson) : MAP_CONFIGS[key]),
+  addMarkers:   (json)         => addMarkers(JSON.parse(json)),
+  clearMarkers: ()             => clearMarkers(),
+  goto:         (x, z, zoom, label) => gotoPosition(x, z, zoom, label),
+  getBuiltinMaps: ()           => JSON.stringify(Object.keys(MAP_CONFIGS).map(k => ({
+    key: k, name: MAP_CONFIGS[k].name
+  }))),
+};
+
+// ── Старт — загружаем Chernarus по умолчанию ─────────────────
+initMap('chernarusplus', MAP_CONFIGS.chernarusplus);
+</script>
+</body>
+</html>
