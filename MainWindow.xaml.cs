@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Data;
 using System.Windows;
 using Microsoft.Win32;
@@ -10,8 +11,54 @@ using System.IO;
 
 namespace GMCraftTableEditor;
 
+public class GMAccessConfig
+{
+        public string TITLE { get; set; }
+    public string AUTHOR { get; set; }
+    public string DISCORD { get; set; }
+    public string CONFIG_VERSION { get; set; }
+    public string GENERAL_SETTINGS { get; set; }
+    public List<string> ADMIN_IDS { get; set; } = new();
+    public List<CraftTableAccess> CRAFT_TABLES { get; set; } = new();
+}
+public class CraftTableAccess
+{
+        public int TABLE_ID { get; set; }
+    public int USE_WHITELIST { get; set; }
+    public List<int> ARRAY_CATEGORY { get; set; } = new();
+    public List<string> ALLOWED_PLAYERS { get; set; } = new();
+    public int STATUS { get; set; }
+}
+
+public class GMCraftTableConfig
+{
+    public string TITLE { get; set; }
+    public string AUTHOR { get; set; }
+    public string DISCORD { get; set; }
+    public string CONFIG_VERSION { get; set; }
+    public string GENERAL_SETTINGS { get; set; }
+
+    public int CAN_BE_REPAIR_TO_PRISTINE { get; set; }
+    public List<CategoryItem> CATEGORY_LIST { get; set; } = new();
+    public List<object> RECIPE_LIST { get; set; } = new();
+}
+
+public class CategoryItem
+{
+    public int TYPE { get; set; }
+    public string NAME { get; set; }
+    public string RECIPE_FILENAME { get; set; }
+    public string ICON_PATH { get; set; }
+    public int PRIVATE { get; set; }
+}
+
 public partial class MainWindow : Window
 {
+    private GMAccessConfig? _accessConfig;
+    private GMCraftTableConfig? _craftConfig;
+
+    private string? _accessConfigPath;
+    private string? _craftConfigPath;
     private ObservableCollection<Recipe> _recipes = new();
     private string? _recipesPath;
 
@@ -136,11 +183,18 @@ public partial class MainWindow : Window
 
     private void AddTool_Click(object sender, RoutedEventArgs e)
     {
-        if (RecipesList.SelectedItem is not Recipe recipe) return;
-        var value = ToolText.Text.Trim();
-        if (value.Length == 0) return;
+        if (RecipesList.SelectedItem is not Recipe recipe)
+            return;
+
+        var value = ToolAutoCompleteBox.Text.Trim();
+
+        if (value.Length == 0)
+            return;
+
         recipe.TOOLS.Add(value);
-        ToolText.Clear();
+
+        ToolAutoCompleteBox.Text = "";
+        RefreshRecipeDetails();
     }
 
     private void DeleteTool_Click(object sender, RoutedEventArgs e)
@@ -291,7 +345,6 @@ public partial class MainWindow : Window
 
         ItemsGrid.ItemsSource = null;
         ItemsGrid.ItemsSource = items.ToList();
-        ItemsGrid.Items.Refresh();
     }
     private ItemDatabaseEntry? SelectedDbItem()
     {
@@ -416,18 +469,258 @@ public partial class MainWindow : Window
     private void AddImportedItems(List<ItemDatabaseEntry> imported)
     {
         var added = 0;
-    
+
         foreach (var item in imported)
         {
             if (_itemDatabase.Any(x => x.ClassName.Equals(item.ClassName, StringComparison.OrdinalIgnoreCase)))
                 continue;
-    
+
             _itemDatabase.Add(item);
             added++;
         }
-    
+
         RefreshItemDatabase();
-    
+
         StatusText.Text = $"Добавлено новых предметов: {added}";
+    }
+    private void ValidateRecipes_Click(object sender, RoutedEventArgs e)
+    {
+        var errors = new List<string>();
+
+        foreach (var recipe in _recipes)
+        {
+            if (string.IsNullOrWhiteSpace(recipe.RESULT))
+            {
+                errors.Add($"[{recipe.RECIPE_NAME}] RESULT пустой");
+            }
+            else if (!ClassNameExists(recipe.RESULT))
+            {
+                errors.Add($"[{recipe.RECIPE_NAME}] RESULT не найден: {recipe.RESULT}");
+            }
+
+            foreach (var tool in recipe.TOOLS)
+            {
+                if (string.IsNullOrWhiteSpace(tool))
+                {
+                    errors.Add($"[{recipe.RECIPE_NAME}] Пустой TOOL");
+                }
+                else if (!ClassNameExists(tool))
+                {
+                    errors.Add($"[{recipe.RECIPE_NAME}] TOOL не найден: {tool}");
+                }
+            }
+
+            foreach (var ingredient in recipe.INGRIDIENTS)
+            {
+                if (string.IsNullOrWhiteSpace(ingredient.CLASSNAME))
+                {
+                    errors.Add($"[{recipe.RECIPE_NAME}] Пустой INGREDIENT");
+                }
+                else if (!ClassNameExists(ingredient.CLASSNAME))
+                {
+                    errors.Add($"[{recipe.RECIPE_NAME}] INGREDIENT не найден: {ingredient.CLASSNAME}");
+                }
+            }
+        }
+
+        if (errors.Count == 0)
+        {
+            MessageBox.Show(
+                "Ошибок не найдено.",
+                "Проверка рецептов",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            return;
+        }
+
+        var text = string.Join(Environment.NewLine, errors);
+
+        MessageBox.Show(
+            text,
+            $"Найдено ошибок: {errors.Count}",
+            MessageBoxButton.OK,
+            MessageBoxImage.Warning);
+    }
+
+    private bool ClassNameExists(string className)
+    {
+        return _itemDatabase.Any(x =>
+            x.ClassName.Equals(className, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void SetupResultAutoComplete()
+    {
+        ResultComboBox.ItemsSource = _itemDatabase;
+    }
+
+    private void ResultComboBox_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        var text = ResultComboBox.Text?.Trim() ?? "";
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            ResultComboBox.ItemsSource = _itemDatabase;
+            ResultComboBox.IsDropDownOpen = false;
+            return;
+        }
+
+        var filtered = _itemDatabase
+            .Where(x =>
+                x.ClassName.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                x.DisplayName.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                x.Category.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                x.SourceMod.Contains(text, StringComparison.OrdinalIgnoreCase))
+            .Take(50)
+            .ToList();
+
+        ResultComboBox.ItemsSource = filtered;
+        ResultComboBox.IsDropDownOpen = filtered.Count > 0;
+
+        var editableTextBox = ResultComboBox.Template.FindName("PART_EditableTextBox", ResultComboBox)
+            as TextBox;
+
+        if (editableTextBox != null)
+        {
+            editableTextBox.Text = text;
+            editableTextBox.CaretIndex = text.Length;
+        }
+    }
+
+    private void ResultComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (RecipesList.SelectedItem is not Recipe recipe)
+            return;
+
+        if (ResultComboBox.SelectedItem is ItemDatabaseEntry item)
+        {
+            recipe.RESULT = item.ClassName;
+            ResultComboBox.Text = item.ClassName;
+        }
+    }
+    private void SetupPlanAutoComplete()
+    {
+        PlanComboBox.ItemsSource = _itemDatabase;
+    }
+
+    private void PlanComboBox_PreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        var text = PlanComboBox.Text?.Trim() ?? "";
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            PlanComboBox.ItemsSource = _itemDatabase;
+            PlanComboBox.IsDropDownOpen = false;
+            return;
+        }
+
+        var filtered = _itemDatabase
+            .Where(x =>
+                x.ClassName.Contains(text, StringComparison.OrdinalIgnoreCase))
+            .Take(50)
+            .ToList();
+
+        PlanComboBox.ItemsSource = filtered;
+        PlanComboBox.IsDropDownOpen = filtered.Count > 0;
+    }
+
+    private void PlanComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (RecipesList.SelectedItem is not Recipe recipe)
+            return;
+
+        if (PlanComboBox.SelectedItem is ItemDatabaseEntry item)
+        {
+            recipe.PLAN = item.ClassName;
+            PlanComboBox.Text = item.ClassName;
+        }
+    }
+    private void SetupToolAutoComplete()
+    {
+        ToolAutoCompleteBox.ItemsSource = _itemDatabase;
+    }
+    private void ToolAutoCompleteBox_PreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        var text = ToolAutoCompleteBox.Text?.Trim() ?? "";
+
+        var filtered = _itemDatabase
+            .Where(x =>
+                x.ClassName.Contains(text, StringComparison.OrdinalIgnoreCase))
+            .Take(50)
+            .ToList();
+
+        ToolAutoCompleteBox.ItemsSource = filtered;
+        ToolAutoCompleteBox.IsDropDownOpen = filtered.Count > 0;
+    }
+    private void AddToolFromAutoComplete_Click(object sender, RoutedEventArgs e)
+    {
+        if (RecipesList.SelectedItem is not Recipe recipe)
+            return;
+
+        var text = ToolAutoCompleteBox.Text?.Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        recipe.TOOLS.Add(text);
+
+        RefreshRecipeDetails();
+
+        ToolAutoCompleteBox.Text = "";
+    }
+    private void SetupIngredientAutoComplete()
+    {
+        IngredientAutoCompleteBox.ItemsSource = _itemDatabase;
+    }
+    private void IngredientAutoCompleteBox_PreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        var text = IngredientAutoCompleteBox.Text?.Trim() ?? "";
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            IngredientAutoCompleteBox.IsDropDownOpen = false;
+            return;
+        }
+
+        var filtered = _itemDatabase
+            .Where(x =>
+                x.ClassName.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                x.DisplayName.Contains(text, StringComparison.OrdinalIgnoreCase))
+            .Take(50)
+            .ToList();
+
+        IngredientAutoCompleteBox.ItemsSource = filtered;
+        IngredientAutoCompleteBox.IsDropDownOpen = filtered.Count > 0;
+    }
+    private void AddIngredientFromAutoComplete_Click(object sender, RoutedEventArgs e)
+    {
+        if (RecipesList.SelectedItem is not Recipe recipe)
+            return;
+
+        var value = IngredientAutoCompleteBox.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+
+        recipe.INGRIDIENTS.Add(new Ingredient
+        {
+            CLASSNAME = value,
+            ITEM_AMOUNT = 1,
+            USE_ENERGY = 0,
+            NEED_LIQUID = 0,
+            LIQUID_TYPE = 0,
+            DESTROY_ITEM = 1,
+            CHANGE_HEALTH_ITEM_BY_CRAFT = 0
+        });
+
+        IngredientAutoCompleteBox.Text = "";
+
+        RefreshRecipeDetails();
+    }
+    private void OpenGmConfigWindow_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new GmConfigWindow();
+        window.Owner = this;
+        window.ShowDialog();
     }
 }

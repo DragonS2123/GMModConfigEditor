@@ -72,12 +72,6 @@
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushSoft}" />
         </Style>
-        <Style TargetType="ComboBox">
-            <Setter Property="Margin" Value="4" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Background" Value="{DynamicResource InputBackground}" />
-            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-        </Style>
         <Style TargetType="CheckBox">
             <Setter Property="Margin" Value="4,8" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
@@ -129,6 +123,103 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource PanelBackground2}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushSoft}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="14"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="Border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4">
+
+                                <Grid>
+                                    <ToggleButton x:Name="ToggleButton"
+                                                  Focusable="False"
+                                                  IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                                  ClickMode="Press"
+                                                  Background="Transparent"
+                                                  BorderThickness="0"/>
+
+                                    <ContentPresenter Margin="8,0,30,0"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Left"
+                                                      Content="{TemplateBinding SelectionBoxItem}"/>
+
+                                    <TextBox x:Name="PART_EditableTextBox"
+                                             Margin="8,0,30,0"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Foreground="{DynamicResource TextBrush}"
+                                             VerticalContentAlignment="Center"
+                                             Visibility="Hidden"/>
+
+                                    <TextBlock Text="▼"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0"/>
+                                </Grid>
+                            </Border>
+
+                            <Popup IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom"
+                                   Focusable="False"
+                                   AllowsTransparency="True"
+                                   PopupAnimation="Slide">
+
+                                <Border Background="{DynamicResource PanelBackground2}"
+                                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                                        BorderThickness="1">
+
+                                    <ScrollViewer>
+                                        <StackPanel IsItemsHost="True"/>
+                                    </ScrollViewer>
+
+                                </Border>
+                            </Popup>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsEditable" Value="True">
+                                <Setter TargetName="PART_EditableTextBox"
+                                        Property="Visibility"
+                                        Value="Visible"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource PanelBackground2}"/>
+            <Setter Property="Padding" Value="6,4"/>
+
+            <Style.Triggers>
+
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="#2563EB"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#2563EB"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <DockPanel LastChildFill="True">
@@ -163,6 +254,7 @@
                     <Border Style="{StaticResource Card}" Grid.Column="0">
                         <DockPanel>
                             <StackPanel DockPanel.Dock="Top">
+                                <Button Content="GM CONFIG" Click="OpenGmConfigWindow_Click"/>
                                 <Button Content="+ Добавить рецепт" Style="{StaticResource AccentButton}" Click="AddRecipe_Click" />
                                 <Button Content="Удалить" Click="DeleteRecipe_Click" />
                                 <TextBox x:Name="RecipeSearchBox" TextChanged="RecipeSearchBox_TextChanged" ToolTip="Поиск по названию, категории или результату" />
@@ -181,7 +273,7 @@
                                         <TextBlock Text="Название RECIPE_NAME" Margin="4"/><TextBox Text="{Binding RECIPE_NAME, UpdateSourceTrigger=PropertyChanged}" />
                                         <TextBlock Text="Описание DESCRIPTION" Margin="4"/><TextBox Text="{Binding DESCRIPTION, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="55" />
                                         <TextBlock Text="Категория CATEGORY" Margin="4"/><TextBox Text="{Binding CATEGORY, UpdateSourceTrigger=PropertyChanged}" />
-                                        <TextBlock Text="Результат RESULT" Margin="4"/><TextBox Text="{Binding RESULT, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBlock Text="Результат RESULT" Margin="4"/><ComboBox x:Name="ResultComboBox" IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True" DisplayMemberPath="ClassName" Text="{Binding RESULT, UpdateSourceTrigger=PropertyChanged}" PreviewKeyUp="ResultComboBox_PreviewKeyUp" SelectionChanged="ResultComboBox_SelectionChanged"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Style="{StaticResource Card}">
@@ -196,7 +288,7 @@
                                 <Border Style="{StaticResource Card}">
                                     <StackPanel>
                                         <TextBlock Text="Чертёж и навык" FontWeight="Bold" Margin="4" />
-                                        <TextBlock Text="Чертёж PLAN" Margin="4"/><TextBox Text="{Binding PLAN, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBlock Text="Чертёж PLAN" Margin="4"/><ComboBox x:Name="PlanComboBox" IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True" DisplayMemberPath="ClassName" Text="{Binding PLAN, UpdateSourceTrigger=PropertyChanged}" PreviewKeyUp="PlanComboBox_PreviewKeyUp" SelectionChanged="PlanComboBox_SelectionChanged"/>
                                         <TextBlock Text="Урон чертежу DAMAGE_TO_PLAN" Margin="4"/><TextBox Text="{Binding DAMAGE_TO_PLAN, UpdateSourceTrigger=PropertyChanged}" />
                                         <TextBlock Text="Навык ABILITY" Margin="4"/><TextBox Text="{Binding ABILITY, UpdateSourceTrigger=PropertyChanged}" />
                                         <TextBlock Text="Требуемый уровень REQUIRED_LEVEL" Margin="4"/><TextBox Text="{Binding REQUIRED_LEVEL, UpdateSourceTrigger=PropertyChanged}" />
@@ -234,7 +326,7 @@
                                 <Border Style="{StaticResource Card}">
                                     <StackPanel>
                                         <TextBlock Text="Инструменты TOOLS" FontWeight="Bold" Margin="4" />
-                                        <StackPanel Orientation="Horizontal"><TextBox x:Name="ToolText" Width="210"/><Button Content="Добавить" Click="AddTool_Click"/><Button Content="Удалить" Click="DeleteTool_Click"/></StackPanel>
+                                        <StackPanel Orientation="Horizontal"><ComboBox x:Name="ToolAutoCompleteBox" Width="260" IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True" DisplayMemberPath="ClassName" PreviewKeyUp="ToolAutoCompleteBox_PreviewKeyUp"/><Button Content="Добавить" Click="AddTool_Click"/><Button Content="Удалить" Click="DeleteTool_Click"/></StackPanel>
                                         <UniformGrid Columns="2">
                                             <StackPanel><TextBlock Text="MIN_TOOLS_DAMAGE"/><TextBox Text="{Binding MIN_TOOLS_DAMAGE, UpdateSourceTrigger=PropertyChanged}" /></StackPanel>
                                             <StackPanel><TextBlock Text="MAX_TOOLS_DAMAGE"/><TextBox Text="{Binding MAX_TOOLS_DAMAGE, UpdateSourceTrigger=PropertyChanged}" /></StackPanel>
@@ -265,7 +357,26 @@
                             <Border Style="{StaticResource Card}">
                                 <StackPanel>
                                     <TextBlock Text="Ингредиенты INGRIDIENTS" FontSize="16" FontWeight="Bold" Margin="4" />
-                                    <StackPanel Orientation="Horizontal"><Button Content="Добавить ингредиент" Click="AddIngredient_Click"/><Button Content="Удалить ингредиент" Click="DeleteIngredient_Click"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+
+                                        <ComboBox x:Name="IngredientAutoCompleteBox"
+                                                  Width="320"
+                                                  IsEditable="True"
+                                                  IsTextSearchEnabled="False"
+                                                  StaysOpenOnEdit="True"
+                                                  DisplayMemberPath="ClassName"
+                                                  PreviewKeyUp="IngredientAutoCompleteBox_PreviewKeyUp"/>
+
+                                        <Button Content="Добавить INGREDIENT"
+                                                Click="AddIngredientFromAutoComplete_Click"
+                                                Margin="8,0,0,0"/>
+                                        <Button Content="Удалить ингредиент" 
+                                                Click="DeleteIngredient_Click"
+                                                Margin="8,0,0,0"/>
+                                        <Button Content="Проверить рецепты" 
+                                                Click="ValidateRecipes_Click"
+                                                Margin="8,0,0,0"/>
+                                    </StackPanel>
                                     <DataGrid x:Name="IngredientsGrid"
                                               AutoGenerateColumns="False"
                                               CanUserAddRows="False"
@@ -318,7 +429,10 @@
                         <TextBox x:Name="ItemDbSearchBox"
                                  Width="260"
                                  Margin="12,0,0,0"
-                                 TextChanged="ItemDbSearchBox_TextChanged"/>
+                                 TextChanged="ItemDbSearchBox_TextChanged"
+                                 ToolTip="Поиск по ClassName, названию, категории или моду"/>
+                        
+                        <Button Content="Проверить рецепты" Click="ValidateRecipes_Click" Margin="12,0,0,0"/>
                     </StackPanel>
             
                     <DataGrid x:Name="ItemsGrid"
