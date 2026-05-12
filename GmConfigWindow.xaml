@@ -4,109 +4,9 @@
         Title="GM Config Editor"
         Height="720"
         Width="1200"
-        Background="#12171F"
-        Foreground="#EBEFF5"
+        Background="{DynamicResource AppBackground}"
+        Foreground="{DynamicResource TextBrush}"
         WindowStartupLocation="CenterOwner">
-
-    <Window.Resources>
-        <SolidColorBrush x:Key="AppBackground" Color="#12171F"/>
-        <SolidColorBrush x:Key="PanelBackground" Color="#1C222C"/>
-        <SolidColorBrush x:Key="PanelBackground2" Color="#262D39"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#EBEFF5"/>
-        <SolidColorBrush x:Key="BorderBrushSoft" Color="#374150"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#159A8C"/>
-        <SolidColorBrush x:Key="DangerBrush" Color="#C94545"/>
-
-        <Style TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            <Setter Property="Background" Value="{StaticResource PanelBackground2}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="Padding" Value="12,4"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-        </Style>
-
-        <Style TargetType="DataGrid">
-            <Setter Property="Background" Value="{StaticResource PanelBackground}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            <Setter Property="RowBackground" Value="{StaticResource PanelBackground}"/>
-            <Setter Property="AlternatingRowBackground" Value="{StaticResource PanelBackground2}"/>
-            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
-            <Setter Property="HeadersVisibility" Value="Column"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource BorderBrushSoft}"/>
-            <Setter Property="VerticalGridLinesBrush" Value="{StaticResource BorderBrushSoft}"/>
-            <Setter Property="AutoGenerateColumns" Value="True"/>
-            <Setter Property="CanUserAddRows" Value="False"/>
-            <Setter Property="CanUserDeleteRows" Value="False"/>
-        </Style>
-
-        <Style TargetType="TextBox">
-            <Setter Property="Background" Value="#161B24"/>
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
-            <Setter Property="Height" Value="30"/>
-        </Style>
-
-        <Style TargetType="ListBox">
-            <Setter Property="Background" Value="{StaticResource PanelBackground}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
-        </Style>
-        <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{StaticResource PanelBackground2}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="8,6"/>
-        </Style>
-
-        <Style TargetType="DataGridCell">
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
-            <Setter Property="Padding" Value="6,2"/>
-        
-            <Style.Triggers>
-        
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#159A8C"/>
-                    <Setter Property="Foreground" Value="White"/>
-                </Trigger>
-        
-                <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                    <Setter Property="Background" Value="#159A8C"/>
-                    <Setter Property="Foreground" Value="White"/>
-                </Trigger>
-        
-            </Style.Triggers>
-        </Style>
-
-        <Style TargetType="TabControl">
-            <Setter Property="Background" Value="{StaticResource AppBackground}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        </Style>
-
-        <Style TargetType="TabItem">
-            <Setter Property="Background" Value="{StaticResource PanelBackground2}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            <Setter Property="Padding" Value="10,4"/>
-        </Style>
-        <Style TargetType="DataGridRow">
-            <Setter Property="Background" Value="#1C222C"/>
-            <Setter Property="Foreground" Value="White"/>
-
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2A3442"/>
-                </Trigger>
-
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#159A8C"/>
-                    <Setter Property="Foreground" Value="White"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </Window.Resources>
 
     <Grid Margin="14">
         <Grid.RowDefinitions>
@@ -115,8 +15,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Background="{StaticResource PanelBackground}"
-                BorderBrush="{StaticResource BorderBrushSoft}"
+        <Border Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderBrushSoft}"
                 BorderThickness="1"
                 CornerRadius="8"
                 Padding="12"
@@ -131,8 +31,8 @@
         </Border>
 
         <TabControl Grid.Row="1"
-                    Background="{StaticResource AppBackground}"
-                    Foreground="{StaticResource TextBrush}">
+                    Background="{DynamicResource AppBackground}"
+                    Foreground="{DynamicResource TextBrush}">
             <TabItem Header="Категории">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
@@ -142,12 +42,12 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <Button Content="+ Добавить категорию"
-                                Background="{StaticResource AccentBrush}"
+                                Background="{DynamicResource AccentBrush}"
                                 Width="170"
                                 Click="AddCategory_Click"/>
 
                         <Button Content="Удалить категорию"
-                                Background="{StaticResource DangerBrush}"
+                                Background="{DynamicResource DangerBrush}"
                                 Width="160"
                                 Click="DeleteCategory_Click"/>
                     </StackPanel>
@@ -168,12 +68,12 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <Button Content="+ Добавить стол"
-                                Background="{StaticResource AccentBrush}"
+                                Background="{DynamicResource AccentBrush}"
                                 Width="150"
                                 Click="AddCraftTable_Click"/>
 
                         <Button Content="Удалить стол"
-                                Background="{StaticResource DangerBrush}"
+                                Background="{DynamicResource DangerBrush}"
                                 Width="140"
                                 Click="DeleteCraftTable_Click"/>
                     </StackPanel>
@@ -198,12 +98,12 @@
                                  Margin="0,0,10,0"/>
 
                         <Button Content="+ Добавить админа"
-                                Background="{StaticResource AccentBrush}"
+                                Background="{DynamicResource AccentBrush}"
                                 Width="160"
                                 Click="AddAdminId_Click"/>
 
                         <Button Content="Удалить админа"
-                                Background="{StaticResource DangerBrush}"
+                                Background="{DynamicResource DangerBrush}"
                                 Width="150"
                                 Click="DeleteAdminId_Click"/>
                     </StackPanel>
@@ -217,7 +117,7 @@
         <TextBlock x:Name="StatusText"
                    Grid.Row="2"
                    Margin="0,10,0,0"
-                   Foreground="{StaticResource TextBrush}"
+                   Foreground="{DynamicResource TextBrush}"
                    Text="Готово"/>
     </Grid>
 </Window>

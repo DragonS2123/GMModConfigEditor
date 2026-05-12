@@ -1,9 +1,8 @@
-bin/
+# В папке проекта
+@"
 obj/
-.vs/
-.vscode/
+bin/
+publish/
 *.user
-*.suo
-*.pdb
-*.exe
-items_database.json
+.vs/
+"@ | Out-File -Encoding UTF8 .gitignore
