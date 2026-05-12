@@ -54,11 +54,6 @@ public class CategoryItem
 
 public partial class MainWindow : Window
 {
-    private GMAccessConfig? _accessConfig;
-    private GMCraftTableConfig? _craftConfig;
-
-    private string? _accessConfigPath;
-    private string? _craftConfigPath;
     private ObservableCollection<Recipe> _recipes = new();
     private string? _recipesPath;
 
