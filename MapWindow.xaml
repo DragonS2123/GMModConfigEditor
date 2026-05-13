@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-        Title="GM Mod Config Editor — Карта"
+        Title="{DynamicResource S.Map.Title}"
         Height="780" Width="1280"
         MinHeight="500" MinWidth="800"
         Background="#1a1a1a"
@@ -29,7 +29,7 @@
 
                 <!-- Выбор карты -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Карта:" VerticalAlignment="Center" Margin="0,0,8,0"
+                    <TextBlock Text="{DynamicResource S.Map.MapLabel}" VerticalAlignment="Center" Margin="0,0,8,0"
                                Foreground="#888" FontSize="12"/>
                     <ComboBox x:Name="MapCombo" Width="180" FontSize="12"
                               SelectionChanged="MapCombo_Changed"/>
@@ -38,26 +38,26 @@
 
                 <!-- Маркеры -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
-                    <CheckBox x:Name="ChkNPC"      Content="🧑 NPC"      IsChecked="True" Margin="0,0,12,0"
+                    <CheckBox x:Name="ChkNPC"      Content="{DynamicResource S.Map.NPC}"      IsChecked="True" Margin="0,0,12,0"
                               Checked="Markers_Changed" Unchecked="Markers_Changed"/>
-                    <CheckBox x:Name="ChkTriggers" Content="📍 Триггеры" IsChecked="True" Margin="0,0,12,0"
+                    <CheckBox x:Name="ChkTriggers" Content="{DynamicResource S.Map.Triggers}" IsChecked="True" Margin="0,0,12,0"
                               Checked="Markers_Changed" Unchecked="Markers_Changed"/>
-                    <CheckBox x:Name="ChkRocks"    Content="⛏ Камни"    IsChecked="True"
+                    <CheckBox x:Name="ChkRocks"    Content="{DynamicResource S.Map.Rocks}"    IsChecked="True"
                               Checked="Markers_Changed" Unchecked="Markers_Changed"/>
                 </StackPanel>
 
                 <!-- Перейти к позиции -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="X:" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#888"/>
+                    <TextBlock Text="{DynamicResource S.Map.X}" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#888"/>
                     <TextBox x:Name="GotoX" Width="75" Margin="0,0,6,0" Padding="4,3" FontFamily="Consolas"/>
-                    <TextBlock Text="Z:" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#888"/>
+                    <TextBlock Text="{DynamicResource S.Map.Z}" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#888"/>
                     <TextBox x:Name="GotoZ" Width="75" Margin="0,0,8,0" Padding="4,3" FontFamily="Consolas"/>
-                    <Button Content="Перейти" Padding="8,4" Click="GotoPos_Click"/>
+                    <Button Content="{DynamicResource S.Map.GoTo}" Padding="8,4" Click="GotoPos_Click"/>
                 </StackPanel>
 
                 <!-- Кнопки -->
                 <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center">
-                    <Button Content="🔄 Обновить" Padding="8,4" Click="RefreshMarkers_Click"/>
+                    <Button Content="{DynamicResource S.Map.Refresh}" Padding="8,4" Click="RefreshMarkers_Click"/>
                 </StackPanel>
 
                 <!-- Координаты мыши -->
@@ -65,7 +65,7 @@
                            VerticalAlignment="Center"
                            Foreground="#7ec8e3"
                            FontFamily="Consolas" FontSize="12"
-                           Text="Наведи на карту..."/>
+                           Text="{DynamicResource S.Map.Hint}"/>
             </Grid>
         </Border>
 

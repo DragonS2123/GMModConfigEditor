@@ -1,0 +1,101 @@
+<Window x:Class="GMCraftTableEditor.WorkshopImportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource S.Workshop.Title}"
+        Width="900"
+        Height="650"
+        WindowStartupLocation="CenterOwner"
+        Background="#10151D">
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="160"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="{DynamicResource S.Workshop.Folder}"
+                   Foreground="#DDE4EF"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,8"/>
+
+        <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="130"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="WorkshopPathBox"
+                     Height="34"
+                     Background="#18202B"
+                     Foreground="#DDE4EF"
+                     BorderBrush="#334155"
+                     Padding="8"/>
+
+            <Button Grid.Column="1"
+                    Content="{DynamicResource S.Workshop.Browse}"
+                    Margin="8,0,0,0"
+                    Click="Browse_Click"/>
+
+            <Button Grid.Column="2"
+                    Content="{DynamicResource S.Workshop.Find}"
+                    Margin="8,0,0,0"
+                    Click="LoadMods_Click"/>
+        </Grid>
+
+        <GroupBox Grid.Row="2"
+                  Header="{DynamicResource S.Workshop.Found}"
+                  Foreground="#DDE4EF"
+                  BorderBrush="#334155">
+            <ListBox x:Name="ModsList"
+                     Background="#141B25"
+                     Foreground="#DDE4EF"
+                     BorderThickness="0"
+                     SelectionMode="Multiple"
+                     DisplayMemberPath="Name"/>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3"
+                  Header="{DynamicResource S.Workshop.Log}"
+                  Foreground="#DDE4EF"
+                  BorderBrush="#334155"
+                  Margin="0,12,0,0">
+            <TextBox x:Name="LogBox"
+                     Background="#0B1017"
+                     Foreground="#8EE6A7"
+                     BorderThickness="0"
+                     FontFamily="Consolas"
+                     FontSize="12"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"/>
+        </GroupBox>
+
+        <Grid Grid.Row="4" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
+
+            <ProgressBar x:Name="Progress"
+                         Height="22"
+                         Minimum="0"
+                         Maximum="100"/>
+
+            <Button Grid.Column="1"
+                    Content="{DynamicResource S.Workshop.Scan}"
+                    Margin="12,0,0,0"
+                    Click="ScanSelected_Click"/>
+
+            <Button Grid.Column="2"
+                    Content="{DynamicResource S.Workshop.Close}"
+                    Margin="12,0,0,0"
+                    Click="Close_Click"/>
+        </Grid>
+    </Grid>
+</Window>

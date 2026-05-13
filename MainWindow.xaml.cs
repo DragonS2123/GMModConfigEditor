@@ -44,7 +44,7 @@ public partial class MainWindow : Window
         // Тёмная тема по умолчанию (уже установлена в App.xaml → Dark.xaml)
         ThemeManager.Apply(dark: true);
         SetupAutoCompletes();
-        Loaded += (_, _) => { InitNavigation(); InitModsAutoCompletes(); WireUpUndoRedo(); WireUpKeyBindings(); };
+        Loaded += (_, _) => { InitNavigation(); InitModsAutoCompletes(); WireUpUndoRedo(); WireUpKeyBindings(); AutoLoadFromGmConfig(); };
     }
 
     private void SetStatus(string text) => StatusText.Text = text;
@@ -429,8 +429,10 @@ public partial class MainWindow : Window
 
     private void ThemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var content = (ThemeCombo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
-        ThemeManager.Apply(content.Contains("Тём"));
+        // ThemeCombo index 0 = Dark, index 1 = Light (language-independent)
+        ThemeManager.Apply(dark: ThemeCombo.SelectedIndex != 1);
+        AppSettingsService.Current.Theme = ThemeManager.IsDark ? "dark" : "light";
+        AppSettingsService.Save();
     }
 
     // ─── Navigation ──────────────────────────────────────────────────────────
@@ -449,19 +451,21 @@ public partial class MainWindow : Window
             Nav_Recipes, Nav_GmConfig, Nav_Quests, Nav_NPC,
             Nav_Loot, Nav_Triggers, Nav_Player, Nav_Items,
             Nav_Medicine, Nav_Ability, Nav_Liquid, Nav_Food,
-            Nav_MineRock, Nav_RockPoints, Nav_Map
+            Nav_MineRock, Nav_RockPoints, Nav_Map,
+            
         };
         _pages = new UIElement[]
         {
             Page_Recipes, Page_GmConfig, Page_Quests, Page_NPC,
             Page_Loot, Page_Triggers, Page_Player, Page_Items,
             Page_Medicine, Page_Ability, Page_Liquid, Page_Food,
-            Page_MineRock, Page_RockPoints, Page_Map
+            Page_MineRock, Page_RockPoints, Page_Map,
+            
         };
 
         // Add toolbar buttons for Recipes page
-        AddTopbarButton("Открыть крафт JSON", "OpenRecipes");
-        AddTopbarButton("Сохранить крафт JSON", "SaveRecipes");
+        AddTopbarButton(LanguageManager.Get("S.Btn.OpenJson"), "OpenRecipes");
+        AddTopbarButton(LanguageManager.Get("S.Btn.SaveJson"), "SaveRecipes");
 
         NavigateTo(0);
     }
@@ -494,7 +498,18 @@ public partial class MainWindow : Window
             _pages[i].Visibility = i == idx ? Visibility.Visible : Visibility.Collapsed;
 
         // Update title and toolbar
-        PageTitle.Text = _pageTitles[idx];
+        // Устанавливаем заголовок через DynamicResource для поддержки смены языка
+var pageResourceKeys = new[] {
+    "S.Nav.Recipes","S.Nav.GmConfig","S.Nav.Quests","S.Nav.NPC","S.Nav.Loot",
+    "S.Nav.Triggers","S.Nav.Player","S.Items.Title","S.Nav.MedicineConfig",
+    "S.Nav.AbilityConfig","S.Nav.LiquidConfig","S.Nav.FoodConfig",
+    "S.Nav.MineRock","S.Nav.RockPoints","S.Nav.Map",
+    
+};
+if (idx < pageResourceKeys.Length)
+    PageTitle.SetResourceReference(TextBlock.TextProperty, pageResourceKeys[idx]);
+else
+    PageTitle.Text = _pageTitles[idx];
         UpdateTopbar(idx);
     }
 
@@ -504,68 +519,68 @@ public partial class MainWindow : Window
         switch (idx)
         {
             case 0: // Рецепты
-                AddTopbarButton("Открыть JSON", "OpenRecipes");
-                AddTopbarButton("Сохранить JSON", "SaveRecipes");
+                AddTopbarButton(LanguageManager.Get("S.Btn.OpenJson"), "OpenRecipes");
+                AddTopbarButton(LanguageManager.Get("S.Btn.SaveJson"), "SaveRecipes");
                 break;
             case 1: // GM Config
-                AddTopbarButton("Открыть CRAFTTABLE_CONFIG", "OpenCraftConfig");
-                AddTopbarButton("Сохранить CRAFTTABLE_CONFIG", "SaveCraftConfig");
-                AddTopbarButton("Открыть ACCESS_CONFIG", "OpenAccessConfig");
-                AddTopbarButton("Сохранить ACCESS_CONFIG", "SaveAccessConfig");
+                AddTopbarButton("GM_CRAFTTABLE_CONFIG ↑", "OpenCraftConfig");
+                AddTopbarButton("GM_CRAFTTABLE_CONFIG ↓", "SaveCraftConfig");
+                AddTopbarButton("GM_ACCESS_CONFIG ↑", "OpenAccessConfig");
+                AddTopbarButton("GM_ACCESS_CONFIG ↓", "SaveAccessConfig");
                 break;
             case 2: // Квесты
-                AddTopbarButton("Открыть id_*.json", "OpenQuestFile");
-                AddTopbarButton("Сохранить квесты", "SaveQuestFile");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Open") + " id_*.json", "OpenQuestFile");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SaveQuestFile");
                 break;
             case 3: // NPC
-                AddTopbarButton("Открыть GM_QuestSystemCFG", "OpenQuestConfig");
-                AddTopbarButton("Сохранить CFG", "SaveQuestConfig");
+                AddTopbarButton("GM_QuestSystemCFG ↑", "OpenQuestConfig");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SaveQuestConfig");
                 break;
             case 4: // Пресеты лута
-                AddTopbarButton("Открыть GM_PRESET_CONFIG", "OpenPresetConfig");
-                AddTopbarButton("Сохранить PRESET", "SavePresetConfig");
+                AddTopbarButton("GM_PRESET_CONFIG ↑", "OpenPresetConfig");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SavePresetConfig");
                 break;
             case 5: // Триггеры
-                AddTopbarButton("Открыть GM_PRESET_CONFIG", "OpenPresetConfig");
-                AddTopbarButton("Сохранить PRESET", "SavePresetConfig");
+                AddTopbarButton("GM_PRESET_CONFIG ↑", "OpenPresetConfig");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SavePresetConfig");
                 break;
             case 6: // Прогресс игрока
-                AddTopbarButton("Открыть SteamID.json", "OpenPlayerData");
+                AddTopbarButton("SteamID.json ↑", "OpenPlayerData");
                 break;
             case 8: // Medicine Config
-                AddTopbarButton("Открыть GM_MEDICINE_CONFIG", "OpenMedicineConfig");
-                AddTopbarButton("Сохранить", "SaveMedicineConfig");
+                AddTopbarButton("GM_MEDICINE_CONFIG ↑", "OpenMedicineConfig");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SaveMedicineConfig");
                 break;
             case 9: // Ability Config
-                AddTopbarButton("Открыть GM_ABILITY_CONFIG", "OpenAbilityConfig");
-                AddTopbarButton("Сохранить", "SaveAbilityConfig");
+                AddTopbarButton("GM_ABILITY_CONFIG ↑", "OpenAbilityConfig");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SaveAbilityConfig");
                 break;
             case 10: // Liquid Config
-                AddTopbarButton("Открыть GM_LiquidConfig", "OpenLiquidConfig");
-                AddTopbarButton("Сохранить", "SaveLiquidConfig");
+                AddTopbarButton("GM_LiquidConfig ↑", "OpenLiquidConfig");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SaveLiquidConfig");
                 break;
             case 11: // Food Config
-                AddTopbarButton("Открыть GM_FoodConfig", "OpenFoodConfig");
-                AddTopbarButton("Сохранить", "SaveFoodConfig");
+                AddTopbarButton("GM_FoodConfig ↑", "OpenFoodConfig");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SaveFoodConfig");
                 break;
             case 12: // MineRock Config
-                AddTopbarButton("Открыть GM_MineRockConfig", "OpenMineRockConfig");
-                AddTopbarButton("Сохранить", "SaveMineRockConfig");
+                AddTopbarButton("GM_MineRockConfig ↑", "OpenMineRockConfig");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SaveMineRockConfig");
                 break;
             case 13: // Rock Points
-                AddTopbarButton("Открыть ROCK_POINTS", "OpenRockPoints");
-                AddTopbarButton("Сохранить", "SaveRockPoints");
+                AddTopbarButton("ROCK_POINTS ↑", "OpenRockPoints");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save"), "SaveRockPoints");
                 break;
             case 14: // Карта
-                AddTopbarButton("🗺 Открыть карту", "OpenMap", accent: true);
+                AddTopbarButton(LanguageManager.Get("S.Btn.OpenMap"), "OpenMap", accent: true);
                 break;
             case 7: // Справочник предметов
-                AddTopbarButton("+ Добавить", "AddItemDb", accent: true);
-                AddTopbarButton("Удалить", "DeleteItemDb", danger: true);
-                AddTopbarButton("Импорт TXT", "ImportTxt");
-                AddTopbarButton("Импорт types.xml", "ImportXml");
-                AddTopbarButton("Импорт папки", "ImportFolder");
-                AddTopbarButton("Сохранить справочник", "SaveItemDb");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Add"), "AddItemDb", accent: true);
+                AddTopbarButton(LanguageManager.Get("S.Btn.Delete"), "DeleteItemDb", danger: true);
+                AddTopbarButton("Import TXT", "ImportTxt");
+                AddTopbarButton("Import types.xml", "ImportXml");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Open") + " folder", "ImportFolder");
+                AddTopbarButton(LanguageManager.Get("S.Btn.Save") + " DB", "SaveItemDb");
                 break;
         }
     }
@@ -1107,5 +1122,25 @@ public partial class MainWindow : Window
         ToolsList.ItemsSource        = null; ToolsList.ItemsSource        = recipe.TOOLS;
         KitItemsList.ItemsSource     = null; KitItemsList.ItemsSource     = recipe.NEEDS_KIT_ITEMS;
         SpecialItemsList.ItemsSource = null; SpecialItemsList.ItemsSource = recipe.NEEDS_SPECIAL_ITEMS;
+    }
+    public void ImportItemDatabaseEntries(List<ItemDatabaseEntry> items)
+    {
+        AddImportedItems(items);
+
+        ItemDatabaseService.Save(
+            _itemDbPath,
+            _itemDatabase.ToList()
+        );
+
+        RefreshItemDatabase();
+    }
+    private void ImportWorkshopClassnames_Click(object sender, RoutedEventArgs e)
+    {
+        var win = new WorkshopImportWindow(this)
+        {
+            Owner = this
+        };
+    
+        win.ShowDialog();
     }
 }

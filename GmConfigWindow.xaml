@@ -1,7 +1,7 @@
 <Window x:Class="GMCraftTableEditor.GmConfigWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="GM Config Editor"
+        Title="{DynamicResource S.GmConfig.Title}"
         Height="720"
         Width="1200"
         Background="{DynamicResource AppBackground}"
@@ -23,17 +23,17 @@
                 Margin="0,0,0,12">
 
             <StackPanel Orientation="Horizontal">
-                <Button Content="Открыть GM_CRAFTTABLE_CONFIG" Width="220" Click="OpenCraftConfig_Click"/>
-                <Button Content="Сохранить GM_CRAFTTABLE_CONFIG" Width="240" Click="SaveCraftConfig_Click"/>
-                <Button Content="Открыть GM_ACCESS_CONFIG" Width="220" Click="OpenAccessConfig_Click"/>
-                <Button Content="Сохранить GM_ACCESS_CONFIG" Width="220" Click="SaveAccessConfig_Click"/>
+                <Button Content="{DynamicResource S.GmConfig.OpenCraft}" Width="220" Click="OpenCraftConfig_Click"/>
+                <Button Content="{DynamicResource S.GmConfig.SaveCraft}" Width="240" Click="SaveCraftConfig_Click"/>
+                <Button Content="{DynamicResource S.GmConfig.OpenAccess}" Width="220" Click="OpenAccessConfig_Click"/>
+                <Button Content="{DynamicResource S.GmConfig.SaveAccess}" Width="220" Click="SaveAccessConfig_Click"/>
             </StackPanel>
         </Border>
 
         <TabControl Grid.Row="1"
                     Background="{DynamicResource AppBackground}"
                     Foreground="{DynamicResource TextBrush}">
-            <TabItem Header="Категории">
+            <TabItem Header="{DynamicResource S.GmConfig.Categories}">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -41,12 +41,12 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="+ Добавить категорию"
+                        <Button Content="{DynamicResource S.GmConfig.AddCategory}"
                                 Background="{DynamicResource AccentBrush}"
                                 Width="170"
                                 Click="AddCategory_Click"/>
 
-                        <Button Content="Удалить категорию"
+                        <Button Content="{DynamicResource S.GmConfig.DelCategory}"
                                 Background="{DynamicResource DangerBrush}"
                                 Width="160"
                                 Click="DeleteCategory_Click"/>
@@ -59,7 +59,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Столы">
+            <TabItem Header="{DynamicResource S.GmConfig.Tables}">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -67,12 +67,12 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="+ Добавить стол"
+                        <Button Content="{DynamicResource S.GmConfig.AddTable}"
                                 Background="{DynamicResource AccentBrush}"
                                 Width="150"
                                 Click="AddCraftTable_Click"/>
 
-                        <Button Content="Удалить стол"
+                        <Button Content="{DynamicResource S.GmConfig.DelTable}"
                                 Background="{DynamicResource DangerBrush}"
                                 Width="140"
                                 Click="DeleteCraftTable_Click"/>
@@ -85,7 +85,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Админы">
+            <TabItem Header="{DynamicResource S.GmConfig.Admins}">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -97,12 +97,12 @@
                                  Width="300"
                                  Margin="0,0,10,0"/>
 
-                        <Button Content="+ Добавить админа"
+                        <Button Content="{DynamicResource S.GmConfig.AddAdmin}"
                                 Background="{DynamicResource AccentBrush}"
                                 Width="160"
                                 Click="AddAdminId_Click"/>
 
-                        <Button Content="Удалить админа"
+                        <Button Content="{DynamicResource S.GmConfig.DelAdmin}"
                                 Background="{DynamicResource DangerBrush}"
                                 Width="150"
                                 Click="DeleteAdminId_Click"/>
@@ -118,6 +118,6 @@
                    Grid.Row="2"
                    Margin="0,10,0,0"
                    Foreground="{DynamicResource TextBrush}"
-                   Text="Готово"/>
+                   Text="{DynamicResource S.Status.Ready}"/>
     </Grid>
 </Window>

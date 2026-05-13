@@ -53,6 +53,25 @@ public partial class MapWindow : Window
         }
     }
 
+    private string MapsDir
+    {
+        get
+        {
+            var candidates = new[]
+            {
+                Path.Combine(AppContext.BaseDirectory, "assets", "maps"),
+                Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "assets", "maps"),
+                Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "assets", "maps"),
+            };
+            foreach (var p in candidates)
+            {
+                var full = Path.GetFullPath(p);
+                if (Directory.Exists(full)) return full;
+            }
+            return Path.Combine(AppContext.BaseDirectory, "assets", "maps");
+        }
+    }
+
     public MapWindow(MainWindow main, double? x = null, double? z = null, string? label = null)
     {
         InitializeComponent();
@@ -107,16 +126,11 @@ public partial class MapWindow : Window
                     Log($"GM ready: {gmReady}");
                     if (gmReady.Contains("no"))
                         await System.Threading.Tasks.Task.Delay(1000);
-                    // Устанавливаем _ready и загружаем карту
                     Dispatcher.Invoke(() =>
                     {
                         Title = "GM Mod Config Editor — Карта";
                         _ready = true;
-                        if (!_mapUiInitialized)
-                        {
-                            _mapUiInitialized = true;
-                            PopulateMapCombo();
-                        }
+                        PopulateMapCombo();
                     });
                 };
 
@@ -146,15 +160,9 @@ public partial class MapWindow : Window
             {
                 switch (type)
                 {
-                    case "ready":
+                       case "ready":
                         _ready = true;
-
-                        if (!_mapUiInitialized)
-                        {
-                            _mapUiInitialized = true;
-                            PopulateMapCombo();
-                        }
-
+                        Log("JS ready - map initialized");
                         break;
 
                     case "coords":
@@ -187,7 +195,7 @@ public partial class MapWindow : Window
         MapCombo.Items.Clear();
 
         // Сканируем папку assets/maps/ — каждая подпапка = карта
-        var mapsDir = Path.Combine(AssetsDir, "maps");
+        var mapsDir = MapsDir;
         Log($"mapsDir={mapsDir} exists={Directory.Exists(mapsDir)}");
         if (Directory.Exists(mapsDir))
         {
@@ -223,11 +231,15 @@ public partial class MapWindow : Window
             MapCombo.Items.Add(new ComboBoxItem { Content = $"★ {cfg.Name}", Tag = $"custom:{key}" });
 
         if (MapCombo.Items.Count == 0)
+        {
             MapCombo.Items.Add(new ComboBoxItem
             {
                 Content = "Нет карт — добавь папку в assets/maps/",
-                IsEnabled = false
+                IsEnabled = false,
+                Tag = ""
             });
+            CoordText.Text = "Нет карт — добавь папку assets/maps/НазваниеКарты/";
+        }
 
         MapCombo.SelectionChanged += MapCombo_Changed;
 
@@ -252,7 +264,7 @@ public partial class MapWindow : Window
         string? cfgContent = null;
         foreach (var fn in new[] { "map.json", "config.json" })
         {
-            var p = Path.Combine(AssetsDir, "maps", folderName, fn);
+            var p = Path.Combine(MapsDir, folderName, fn);
             if (File.Exists(p))
             {
                 cfgContent = File.ReadAllText(p);
@@ -262,7 +274,7 @@ public partial class MapWindow : Window
 
         if (string.IsNullOrWhiteSpace(cfgContent))
         {
-            MessageBox.Show($"Не найден map.json:\n{Path.Combine(AssetsDir, "maps", folderName)}");
+            MessageBox.Show($"Не найден map.json:\n{Path.Combine(MapsDir, folderName)}");
             return;
         }
 

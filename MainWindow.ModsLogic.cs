@@ -22,11 +22,15 @@ namespace GMCraftTableEditor;
 
 public class FlatConfigRow
 {
-    public string Key      { get; set; } = "";
-    public string Value    { get; set; } = "";
+    public string Key         { get; set; } = "";
+    public string Value       { get; set; } = "";
     /// <summary>section / string / int / float / list</summary>
-    public string Kind     { get; set; } = "";
-    public bool   IsSection => Kind == "section";
+    public string Kind        { get; set; } = "";
+    public bool   IsSection   => Kind == "section";
+
+    /// <summary>Читаемое название из словаря. Если пусто — показываем Key.</summary>
+    public string DisplayName { get; set; } = "";
+    public string ShownKey    => string.IsNullOrEmpty(DisplayName) ? Key : DisplayName;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -282,7 +286,13 @@ public partial class MainWindow
             );
             if (isSep) kind = "section";
 
-            rows.Add(new FlatConfigRow { Key = prop.Name, Value = val, Kind = kind });
+            rows.Add(new FlatConfigRow
+            {
+                Key         = prop.Name,
+                Value       = val,
+                Kind        = kind,
+                DisplayName = KeyDisplayNameService.GetDisplayName(prop.Name, LanguageManager.IsRussian)
+            });
         }
         return rows;
     }
@@ -352,7 +362,7 @@ public partial class MainWindow
             LoadMedicineGrid(_medicineAll);
 
             // Populate section filter
-            MedicineSectionCombo.ItemsSource = new[] { "Все" }.Concat(GetSections(_medicineAll)).ToList();
+            MedicineSectionCombo.ItemsSource = new[] { LanguageManager.Get("S.Col.All") }.Concat(GetSections(_medicineAll)).ToList();
             MedicineSectionCombo.SelectedIndex = 0;
             SetStatus($"GM_MEDICINE_CONFIG загружен: {_medicineAll.Count} ключей");
             _autoSave.Register("medicine", () => { if (_medicinePath != null) SaveFlatConfig(_medicinePath, _medicineAll, _medicinePath); });
@@ -388,12 +398,12 @@ public partial class MainWindow
     private void FilterMedicineGrid()
     {
         var q    = MedicineSearchBox.Text?.Trim() ?? "";
-        var sect = MedicineSectionCombo.SelectedItem?.ToString() ?? "Все";
+        var sect = MedicineSectionCombo.SelectedItem?.ToString() ?? LanguageManager.Get("S.Col.All");
 
         IEnumerable<FlatConfigRow> rows = _medicineAll;
 
         // Section filter: show from section header to next section
-        if (sect != "Все")
+        if (sect != LanguageManager.Get("S.Col.All"))
         {
             var inSect  = false;
             var filtered = new List<FlatConfigRow>();
@@ -491,7 +501,7 @@ public partial class MainWindow
             _liquidPath = dlg.FileName;
             _liquidAll  = LoadFlatConfig(_liquidPath);
 
-            LiquidSectionCombo.ItemsSource = new[] { "Все" }.Concat(GetSections(_liquidAll)).ToList();
+            LiquidSectionCombo.ItemsSource = new[] { LanguageManager.Get("S.Col.All") }.Concat(GetSections(_liquidAll)).ToList();
             LiquidSectionCombo.SelectedIndex = 0;
             FilterLiquidGrid();
             SetStatus($"GM_LiquidConfig загружен: {_liquidAll.Count} ключей");
@@ -518,10 +528,10 @@ public partial class MainWindow
     private void FilterLiquidGrid()
     {
         var q    = LiquidSearchBox.Text?.Trim() ?? "";
-        var sect = LiquidSectionCombo.SelectedItem?.ToString() ?? "Все";
+        var sect = LiquidSectionCombo.SelectedItem?.ToString() ?? LanguageManager.Get("S.Col.All");
 
         IEnumerable<FlatConfigRow> rows = _liquidAll;
-        if (sect != "Все")
+        if (sect != LanguageManager.Get("S.Col.All"))
         {
             var inSect   = false;
             var filtered = new List<FlatConfigRow>();

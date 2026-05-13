@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
+using GMCraftTableEditor.Services;
 
 namespace GMCraftTableEditor;
 
@@ -38,46 +39,32 @@ public partial class App : Application
 
         try
         {
-            // Применяем тёмную тему (цвета уже в App.xaml, это просто синхронизирует ThemeManager)
-            ThemeManager.Apply(dark: true);
+            // 1. Загружаем настройки (тема, язык, путь к проекту)
+            var settings = AppSettingsService.Load();
 
+            // 2. Применяем тему
+            ThemeManager.Apply(dark: settings.Theme != "light");
+
+            // 3. Применяем язык
+            LanguageManager.Apply(russian: settings.Language != "en");
+
+            // 4. Если путь к проекту не настроен — показываем окно настройки
+            if (!GmPathService.IsConfigured)
+            {
+                // Пробуем загрузить из сохранённых настроек
+                GmPathService.LoadFromSettings();
+            }
+
+            if (!GmPathService.IsConfigured)
+            {
+                var setup = new ProjectSetupWindow();
+                setup.ShowDialog();
+            }
+
+            // 5. Открываем главное окно (всегда, даже если путь не настроен)
             var window = new MainWindow();
             window.Show();
-        
-    /// <summary>
-    /// Распаковывает встроенные файлы assets рядом с exe при первом запуске.
-    /// </summary>
-    private static void ExtractEmbeddedAssets()
-    {
-        var assetsDir = Path.Combine(AppContext.BaseDirectory, "assets");
-        Directory.CreateDirectory(assetsDir);
-
-        var asm = Assembly.GetExecutingAssembly();
-        var resources = new[]
-        {
-            ("assets.map.html",    Path.Combine(assetsDir, "map.html")),
-            ("assets.leaflet.js",  Path.Combine(assetsDir, "leaflet.js")),
-            ("assets.leaflet.css", Path.Combine(assetsDir, "leaflet.css")),
-        };
-
-        foreach (var (resourceName, destPath) in resources)
-        {
-            try
-            {
-                using var stream = asm.GetManifestResourceStream(resourceName);
-                if (stream == null) continue;
-
-                // Обновляем только если изменился размер
-                if (File.Exists(destPath) && new FileInfo(destPath).Length == stream.Length)
-                    continue;
-
-                using var file = File.Create(destPath);
-                stream.CopyTo(file);
-            }
-            catch { /* не критично */ }
         }
-    }
-}
         catch (Exception ex)
         {
             MessageBox.Show(
@@ -86,6 +73,35 @@ public partial class App : Application
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             Shutdown();
+        }
+    }
+
+    private static void ExtractEmbeddedAssets()
+    {
+        var assetsDir = Path.Combine(AppContext.BaseDirectory, "assets");
+        Directory.CreateDirectory(assetsDir);
+
+        var asm = Assembly.GetExecutingAssembly();
+        var files = new[]
+        {
+            ("assets.map.html",    "map.html"),
+            ("assets.leaflet.js",  "leaflet.js"),
+            ("assets.leaflet.css", "leaflet.css"),
+        };
+
+        foreach (var (resourceName, fileName) in files)
+        {
+            try
+            {
+                using var stream = asm.GetManifestResourceStream(resourceName);
+                if (stream == null) continue;
+                var destPath = Path.Combine(assetsDir, fileName);
+                if (File.Exists(destPath) && new FileInfo(destPath).Length == stream.Length)
+                    continue;
+                using var file = File.Create(destPath);
+                stream.CopyTo(file);
+            }
+            catch { }
         }
     }
 }
