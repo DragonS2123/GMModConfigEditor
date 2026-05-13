@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System;
 using System.IO;
 using System.Reflection;
@@ -15,6 +16,9 @@ public partial class App : Application
 
         // Распаковываем встроенные assets при первом запуске
         ExtractEmbeddedAssets();
+
+        // Распаковываем Python и скрипты если нужно
+        ExtractPythonTools();
 
         // Ловим необработанные исключения в UI-потоке
         DispatcherUnhandledException += (s, ex) =>
@@ -73,6 +77,73 @@ public partial class App : Application
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             Shutdown();
+        }
+    }
+
+    /// <summary>
+    /// Возвращает папку реального .exe (работает и при PublishSingleFile).
+    /// </summary>
+    public static string GetExeDirectory()
+    {
+        var exe = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+        return !string.IsNullOrEmpty(exe)
+            ? Path.GetDirectoryName(exe)!
+            : AppContext.BaseDirectory;
+    }
+
+    /// <summary>
+    /// Распаковывает embeddable Python и workshop_scanner.py рядом с exe
+    /// при первом запуске (или если файлы отсутствуют).
+    /// </summary>
+    private static void ExtractPythonTools()
+    {
+        var exeDir     = GetExeDirectory();
+        var pythonExe  = Path.Combine(exeDir, "Tools", "Python", "python.exe");
+        var scriptPath = Path.Combine(exeDir, "Tools", "Scripts", "workshop_scanner.py");
+
+        var asm = Assembly.GetExecutingAssembly();
+
+        // ── Распаковываем Python (zip) ────────────────────────────────────
+        if (!File.Exists(pythonExe))
+        {
+            try
+            {
+                using var zipStream = asm.GetManifestResourceStream("tools.python-embed.zip");
+                if (zipStream != null)
+                {
+                    var pythonDir = Path.Combine(exeDir, "Tools", "Python");
+                    Directory.CreateDirectory(pythonDir);
+
+                    using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (string.IsNullOrEmpty(entry.Name)) continue; // папка
+                        var dest = Path.Combine(pythonDir, entry.FullName.Replace('/', Path.DirectorySeparatorChar));
+                        Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
+                        using var src  = entry.Open();
+                        using var file = File.Create(dest);
+                        src.CopyTo(file);
+                    }
+                }
+            }
+            catch { /* тихо — при следующем запуске попробуем снова */ }
+        }
+
+        // ── Распаковываем workshop_scanner.py ────────────────────────────
+        if (!File.Exists(scriptPath))
+        {
+            try
+            {
+                using var stream = asm.GetManifestResourceStream("tools.workshop_scanner.py");
+                if (stream != null)
+                {
+                    var scriptsDir = Path.Combine(exeDir, "Tools", "Scripts");
+                    Directory.CreateDirectory(scriptsDir);
+                    using var file = File.Create(scriptPath);
+                    stream.CopyTo(file);
+                }
+            }
+            catch { }
         }
     }
 

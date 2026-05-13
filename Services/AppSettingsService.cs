@@ -37,8 +37,7 @@ public static class AppSettingsService
         PropertyNameCaseInsensitive = true,
     };
 
-    private static string SettingsPath =>
-        Path.Combine(AppContext.BaseDirectory, "settings.json");
+    private static string SettingsPath => Path.Combine(App.GetExeDirectory(), "settings.json");
 
     public static AppSettings Current { get; private set; } = new();
 

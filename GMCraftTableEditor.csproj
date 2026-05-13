@@ -34,6 +34,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Tools\python-embed.zip">
+      <LogicalName>tools.python-embed.zip</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\Scripts\workshop_scanner.py">
+      <LogicalName>tools.workshop_scanner.py</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Встраиваем map.html и leaflet как EmbeddedResource -->
     <EmbeddedResource Include="assets\map.html">
       <LogicalName>assets.map.html</LogicalName>

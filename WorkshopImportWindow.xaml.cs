@@ -84,7 +84,7 @@ public partial class WorkshopImportWindow : Window
             .Cast<WorkshopModItem>()
             .ToList();
 
-        var tempDir = Path.Combine(AppContext.BaseDirectory, "temp_workshop_import");
+        var tempDir = Path.Combine(App.GetExeDirectory(), "temp_workshop_import");
         Directory.CreateDirectory(tempDir);
 
         var inputJson = Path.Combine(tempDir, "selected_mods.json");
@@ -101,8 +101,8 @@ public partial class WorkshopImportWindow : Window
             JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true })
         );
 
-        var pythonExe = Path.Combine(AppContext.BaseDirectory, "Tools", "Python", "python.exe");
-        var scriptPath = Path.Combine(AppContext.BaseDirectory, "Tools", "Scripts", "workshop_scanner.py");
+        var pythonExe = Path.Combine(App.GetExeDirectory(), "Tools", "Python", "python.exe");
+        var scriptPath = Path.Combine(App.GetExeDirectory(), "Tools", "Scripts", "workshop_scanner.py");
 
         if (!File.Exists(pythonExe))
         {
