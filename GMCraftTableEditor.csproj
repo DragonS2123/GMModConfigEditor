@@ -11,16 +11,35 @@
     <Version>1.2.0</Version>
     <AssemblyVersion>1.2.0.0</AssemblyVersion>
     <FileVersion>1.2.0.0</FileVersion>
+    <!-- Описание релиза -->
+    <Description>GM Mod Config Editor v1.2.0 — Редактор конфигов DayZ мода</Description>
+    <Copyright>GM Mod Config Editor</Copyright>
   </PropertyGroup>
+
   <ItemGroup>
     <SplashScreen Include="Assets\splash.png" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2849.39" />
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="Assets\map.html">
+    <!-- Копируем map.html автоматически при сборке -->
+    <Content Include="assets\map.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>assets\map.html</TargetPath>
     </Content>
+    <!-- Leaflet локально -->
+    <Content Include="assets\leaflet.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>assets\leaflet.js</TargetPath>
+    </Content>
+    <Content Include="assets\leaflet.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>assets\leaflet.css</TargetPath>
+    </Content>
+    <!-- ТАЙЛЫ КАРТ НЕ ВКЛЮЧЕНЫ В СБОРКУ — копируй вручную в assets\maps\ -->
   </ItemGroup>
+
 </Project>

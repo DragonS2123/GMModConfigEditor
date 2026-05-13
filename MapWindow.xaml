@@ -33,8 +33,7 @@
                                Foreground="#888" FontSize="12"/>
                     <ComboBox x:Name="MapCombo" Width="180" FontSize="12"
                               SelectionChanged="MapCombo_Changed"/>
-                    <Button Content="+ Своя карта" Margin="8,0,0,0" Padding="8,4"
-                            Click="AddCustomMap_Click" FontSize="11"/>
+
                 </StackPanel>
 
                 <!-- Маркеры -->

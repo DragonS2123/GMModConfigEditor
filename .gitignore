@@ -8,3 +8,8 @@ publish/
 "@ | Out-File -Encoding UTF8 .gitignore
 *.exe
 publish/
+assets/maps/
+bin/
+obj/
+webview2_data/
+*.log
