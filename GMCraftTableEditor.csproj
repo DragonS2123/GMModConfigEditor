@@ -11,9 +11,12 @@
     <Version>1.2.0</Version>
     <AssemblyVersion>1.2.0.0</AssemblyVersion>
     <FileVersion>1.2.0.0</FileVersion>
-    <!-- Описание релиза -->
-    <Description>GM Mod Config Editor v1.2.0 — Редактор конфигов DayZ мода</Description>
-    <Copyright>GM Mod Config Editor</Copyright>
+    <!-- Single file publish -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,21 +28,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Копируем map.html автоматически при сборке -->
-    <Content Include="assets\map.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>assets\map.html</TargetPath>
-    </Content>
-    <!-- Leaflet локально -->
-    <Content Include="assets\leaflet.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>assets\leaflet.js</TargetPath>
-    </Content>
-    <Content Include="assets\leaflet.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>assets\leaflet.css</TargetPath>
-    </Content>
-    <!-- ТАЙЛЫ КАРТ НЕ ВКЛЮЧЕНЫ В СБОРКУ — копируй вручную в assets\maps\ -->
+    <!-- Встраиваем map.html и leaflet как EmbeddedResource -->
+    <EmbeddedResource Include="assets\map.html">
+      <LogicalName>assets.map.html</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="assets\leaflet.js">
+      <LogicalName>assets.leaflet.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="assets\leaflet.css">
+      <LogicalName>assets.leaflet.css</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
