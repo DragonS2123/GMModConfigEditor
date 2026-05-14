@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>GMCraftTableEditor</AssemblyName>
+    <RootNamespace>GMCraftTableEditor</RootNamespace>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>assets\app.ico</ApplicationIcon>
+    <Version>1.5.0</Version>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
+    <!-- Single file publish -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SplashScreen Include="Assets\splash.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2849.39" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Tools\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Встраиваем map.html и leaflet как EmbeddedResource -->
+    <EmbeddedResource Include="assets\map.html">
+      <LogicalName>assets.map.html</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="assets\leaflet.js">
+      <LogicalName>assets.leaflet.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="assets\leaflet.css">
+      <LogicalName>assets.leaflet.css</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

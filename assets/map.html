@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>GM Map</title>
+<link rel="stylesheet" href="/leaflet.css"/>
+<style>
+  html, body, #map { width:100%; height:100%; margin:0; background:#12171F; }
+  .leaflet-popup-content-wrapper { background:#1e2530; color:#dde4ef; border:1px solid #3a4a5e; border-radius:6px; }
+  .leaflet-popup-tip { background:#1e2530; }
+  .leaflet-popup-content { margin:10px 14px; font-size:13px; line-height:1.6; }
+  .leaflet-popup-content b { color:#fff; font-size:14px; display:block; margin-bottom:4px; }
+  .leaflet-popup-content code { background:#111827; padding:3px 7px; border-radius:4px; font-family:monospace; color:#7ec8e3; font-size:12px; display:inline-block; margin-top:4px; }
+  .leaflet-popup-content small { color:#8899aa; }
+  .leaflet-control-attribution { background:rgba(0,0,0,0.5)!important; color:#555!important; font-size:10px; }
+  .gm-pin { border-radius:50%; border:2px solid rgba(255,255,255,0.8); box-shadow:0 2px 8px rgba(0,0,0,0.9); cursor:pointer; transition:transform 0.12s; }
+  .gm-pin:hover { transform:scale(1.6); }
+  .gm-pin.npc { background:#15A892; }
+  .gm-pin.trigger { background:#E07820; }
+  .gm-pin.rock { background:#7A8898; }
+  .gm-pin.target { background:#F0C030; border:3px solid white; }
+  #coords-box { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(18,23,31,0.88); color:#7ec8e3; padding:5px 16px; border-radius:20px; font-family:monospace; font-size:13px; z-index:1000; pointer-events:none; border:1px solid #2a3a4e; display:none; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="coords-box"></div>
+<script src="/leaflet.js"></script>
+<script>
+var map = null, curCfg = null, gmarkers = [];
+
+function initMap(key, cfg) {
+  if (!cfg) return;
+  curCfg = cfg;
+
+  if (map) { map.remove(); map = null; }
+  gmarkers = [];
+
+  var maxZoom   = cfg.maxZoom   || 7;
+  var tileSize  = cfg.tileSize  || 256;
+  var worldSize = cfg.worldSize || 12800;
+  var tileCount = Math.pow(2, maxZoom); // 128
+  var scale     = tileCount * tileSize; // 32768
+
+  // Начинаем с маленького зума чтобы не грузить все тайлы сразу
+  var startZoom = cfg.defaultZoom || 3;
+
+  map = L.map('map', {
+    minZoom:     0,
+    maxZoom:     maxZoom,
+    zoomControl: true,
+    crs:         L.CRS.Simple,
+  });
+
+  var tileUrl = cfg.tileUrl || 'tiles/{z}/{x}/{y}.webp';
+  if (tileUrl.indexOf('http') < 0 && tileUrl.indexOf('/') !== 0) {
+    tileUrl = '/maps/' + key + '/' + tileUrl;
+  }
+
+  // CRS.Simple: unproject([px,py],zoom) -> latLng
+  // Для карты: pixel(0,0)=top-left, pixel(scale,scale)=bottom-right
+  var topLeft     = map.unproject([0,     0    ], maxZoom);
+  var bottomRight = map.unproject([scale, scale], maxZoom);
+  var mapBounds   = L.latLngBounds(topLeft, bottomRight);
+
+  L.tileLayer(tileUrl, {
+    tms:           cfg.invertY || false,
+    noWrap:        true,
+    bounds:        mapBounds,
+    tileSize:      tileSize,
+    maxNativeZoom: maxZoom,
+    minNativeZoom: 0,
+    updateWhenIdle:true,
+    keepBuffer:    1,
+    attribution:   '© GM Map Editor',
+  }).addTo(map);
+
+  map.setMaxBounds(mapBounds.pad(0.1));
+
+  // Центр карты
+  var center = map.unproject([scale/2, scale/2], maxZoom);
+  map.fitBounds(mapBounds);
+  map.setView(center, startZoom);
+
+
+
+  function dayzToLatLng(x, z) {
+    var px = (x / worldSize) * scale;
+    var py = cfg.invertY ? scale - (z / worldSize) * scale : (z / worldSize) * scale;
+    return map.unproject([px, py], maxZoom);
+  }
+
+  function latlngToDayz(latlng) {
+    var p = map.project(latlng, maxZoom);
+    return {
+      x: (p.x / scale) * worldSize,
+      z: cfg.invertY
+        ? ((scale - p.y) / scale) * worldSize
+        : (p.y / scale) * worldSize
+    };
+  }
+
+  curCfg._dayzToLatLng = dayzToLatLng;
+  curCfg._latlngToDayz = latlngToDayz;
+
+  var coordsBox = document.getElementById('coords-box');
+  map.on('mousemove', function(e) {
+    var c = latlngToDayz(e.latlng);
+    coordsBox.style.display = 'block';
+    coordsBox.textContent = 'X: ' + c.x.toFixed(3) + '   Z: ' + c.z.toFixed(3);
+    try { window.chrome.webview.postMessage(JSON.stringify({type:'coords', x:c.x, z:c.z})); } catch(ex){}
+  });
+  map.on('click', function(e) {
+    var c = latlngToDayz(e.latlng);
+    try { window.chrome.webview.postMessage(JSON.stringify({type:'click', x:c.x, z:c.z})); } catch(ex){}
+  });
+
+  try { window.chrome.webview.postMessage(JSON.stringify({type:'ready', map:key})); } catch(ex){}
+}
+
+function clearMarkers() {
+  gmarkers.forEach(function(m) { try { m.remove(); } catch(e){} });
+  gmarkers = [];
+}
+
+function addMarkers(json) {
+  clearMarkers();
+  if (!curCfg || !curCfg._dayzToLatLng) return;
+  var data = typeof json === 'string' ? JSON.parse(json) : json;
+  var colors = {npc:'#15A892', trigger:'#E07820', rock:'#7A8898', target:'#F0C030'};
+  data.forEach(function(md) {
+    var latlng = curCfg._dayzToLatLng(md.x, md.z);
+    var sz = md.type === 'target' ? 16 : 12;
+    var col = colors[md.type] || '#aaa';
+    var icon = L.divIcon({
+      html: '<div class="gm-pin ' + md.type + '" style="width:' + sz + 'px;height:' + sz + 'px;background:' + col + '"></div>',
+      className:'', iconSize:[sz,sz], iconAnchor:[sz/2,sz/2]
+    });
+    var popup = '<b>' + md.label + '</b>' + (md.extra ? '<small>' + md.extra + '</small>' : '') + '<code>X:' + md.x + ' Z:' + md.z + '</code>';
+    gmarkers.push(L.marker(latlng, {icon:icon}).bindPopup(popup, {maxWidth:260}).addTo(map));
+  });
+  try { window.chrome.webview.postMessage(JSON.stringify({type:'markersAdded', count:gmarkers.length})); } catch(ex){}
+}
+
+function gotoPos(x, z, zoom, label) {
+  if (!curCfg || !curCfg._dayzToLatLng) return;
+  var latlng = curCfg._dayzToLatLng(x, z);
+  map.setView(latlng, zoom || curCfg.maxZoom);
+  if (label) {
+    var icon = L.divIcon({html:'<div class="gm-pin target" style="width:16px;height:16px"></div>', className:'', iconSize:[16,16], iconAnchor:[8,8]});
+    gmarkers.push(L.marker(latlng, {icon:icon}).bindPopup('<b>' + label + '</b><code>X:' + x + ' Z:' + z + '</code>', {maxWidth:220}).addTo(map).openPopup());
+  }
+}
+
+window.GM = {
+  loadMap:     function(key, cfgJson) { initMap(key, cfgJson ? JSON.parse(cfgJson) : null); },
+  addMarkers:  function(json) { addMarkers(json); },
+  clearMarkers:function() { clearMarkers(); },
+  goto:        function(x,z,zoom,lbl) { gotoPos(x,z,zoom,lbl); },
+};
+</script>
+</body>
+</html>

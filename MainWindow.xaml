@@ -1,0 +1,1871 @@
+<Window x:Class="GMCraftTableEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource S.App.Title}"
+        Height="860" Width="1450"
+        MinHeight="720" MinWidth="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource AppBackground}"
+        Foreground="{DynamicResource TextBrush}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Боковое меню -->
+            <ColumnDefinition Width="220"/>
+            <!-- Контент -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             БОКОВОЕ МЕНЮ
+        ══════════════════════════════════════════════════════════════════ -->
+        <Border Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderBrushSoft}"
+                BorderThickness="0,0,1,0">
+            <DockPanel>
+
+                <!-- Логотип -->
+                <Border DockPanel.Dock="Top"
+                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                        BorderThickness="0,0,0,1"
+                        Padding="16,14">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource S.App.Title}"
+                                   FontSize="13" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextBrush}"/>
+                        <TextBlock Text="v1.5.0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   Margin="0,2,0,0"/>
+                        <!-- Язык и путь к проекту — под названием -->
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Content="📁"
+                                    ToolTip="{DynamicResource S.Settings.ProjectPath}"
+                                    Click="ProjectSettings_Click"
+                                    Padding="4,3"
+                                    FontSize="12"
+                                    Background="{DynamicResource PanelBackground2}"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    BorderBrush="{DynamicResource BorderBrushSoft}"
+                                    Cursor="Hand"/>
+                            <Button Grid.Column="2"
+                                    x:Name="LangBtn"
+                                    Content="{DynamicResource S.Lang.Button}"
+                                    Click="LangBtn_Click"
+                                    Width="36" Height="24"
+                                    FontSize="11" FontWeight="Bold"
+                                    Background="{DynamicResource AccentBrush}"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    Cursor="Hand"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Переключатель темы внизу -->
+                <Border DockPanel.Dock="Bottom"
+                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                        BorderThickness="0,1,0,0"
+                        Padding="16,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{DynamicResource S.Theme.Label}" VerticalAlignment="Center"
+                                   FontSize="12" Foreground="{DynamicResource MutedTextBrush}"/>
+                        <ComboBox x:Name="ThemeCombo" Grid.Column="1" Width="100"
+                                  SelectionChanged="ThemeCombo_SelectionChanged">
+                            <ComboBoxItem Content="{DynamicResource S.Theme.Dark}" IsSelected="True"/>
+                            <ComboBoxItem Content="{DynamicResource S.Theme.Light}"/>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <!-- Навигация -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,8,0,0">
+
+                        <!-- Секция: Крафт -->
+                        <TextBlock Text="{DynamicResource S.Nav.Craft}"
+                                   FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   Margin="16,8,0,4"/>
+
+                        <Border x:Name="Nav_Recipes"
+                                Style="{StaticResource NavItem}"
+                                Tag="Recipes"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="⚙" FontSize="15" Margin="0,0,10,0"
+                                           Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.Recipes}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_GmConfig"
+                                Style="{StaticResource NavItem}"
+                                Tag="GmConfig"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🔧" FontSize="15" Margin="0,0,10,0"
+                                           Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.GmConfig}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Секция: Квест система -->
+                        <TextBlock Text="{DynamicResource S.Nav.Quest}"
+                                   FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   Margin="16,16,0,4"/>
+
+                        <Border x:Name="Nav_Quests"
+                                Style="{StaticResource NavItem}"
+                                Tag="Quests"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="📋" FontSize="15" Margin="0,0,10,0"
+                                           Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.Quests}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_NPC"
+                                Style="{StaticResource NavItem}"
+                                Tag="{DynamicResource S.Nav.NPC}"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="👤" FontSize="15" Margin="0,0,10,0"
+                                           Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.NPC}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_Loot"
+                                Style="{StaticResource NavItem}"
+                                Tag="Loot"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🎁" FontSize="15" Margin="0,0,10,0"
+                                           Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.Loot}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_Triggers"
+                                Style="{StaticResource NavItem}"
+                                Tag="Triggers"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="📍" FontSize="15" Margin="0,0,10,0"
+                                           Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.Triggers}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_Player"
+                                Style="{StaticResource NavItem}"
+                                Tag="Player"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="📊" FontSize="15" Margin="0,0,10,0"
+                                           Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.Player}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Секция: Медицина -->
+                        <TextBlock Text="{DynamicResource S.Nav.Medicine}"
+                                   FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   Margin="16,16,0,4"/>
+
+                        <Border x:Name="Nav_Medicine"
+                                Style="{StaticResource NavItem}" Tag="Medicine"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="💊" FontSize="15" Margin="0,0,10,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.MedicineConfig}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_Ability"
+                                Style="{StaticResource NavItem}" Tag="Ability"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="⭐" FontSize="15" Margin="0,0,10,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.AbilityConfig}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Секция: Еда -->
+                        <TextBlock Text="{DynamicResource S.Nav.Food}"
+                                   FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   Margin="16,16,0,4"/>
+
+                        <Border x:Name="Nav_Liquid"
+                                Style="{StaticResource NavItem}" Tag="Liquid"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🧪" FontSize="15" Margin="0,0,10,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.LiquidConfig}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_Food"
+                                Style="{StaticResource NavItem}" Tag="Food"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🍖" FontSize="15" Margin="0,0,10,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.FoodConfig}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Секция: Майнинг -->
+                        <TextBlock Text="{DynamicResource S.Nav.Mining}"
+                                   FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   Margin="16,16,0,4"/>
+
+                        <Border x:Name="Nav_MineRock"
+                                Style="{StaticResource NavItem}" Tag="MineRock"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="⛏" FontSize="15" Margin="0,0,10,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.MineRock}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_RockPoints"
+                                Style="{StaticResource NavItem}" Tag="RockPoints"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🪨" FontSize="15" Margin="0,0,10,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.RockPoints}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Секция: Настройки -->
+                        <TextBlock Text="{DynamicResource S.Nav.Settings}"
+                                   FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   Margin="16,16,0,4"/>
+
+                        <Border x:Name="Nav_Map"
+                                Style="{StaticResource NavItem}" Tag="Map"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🗺" FontSize="15" Margin="0,0,10,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Nav.Map}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="Nav_Items"
+                                Style="{StaticResource NavItem}"
+                                Tag="Items"
+                                MouseLeftButtonUp="NavItem_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="📦" FontSize="15" Margin="0,0,10,0"
+                                           Foreground="{DynamicResource MutedTextBrush}"/>
+                                <TextBlock Text="{DynamicResource S.Items.Title}"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             ПРАВАЯ ЧАСТЬ: топбар + контент
+        ══════════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Топбар -->
+            <Border Background="{DynamicResource PanelBackground}"
+                    BorderBrush="{DynamicResource BorderBrushSoft}"
+                    BorderThickness="0,0,0,1"
+                    Padding="14,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Заголовок страницы -->
+                    <TextBlock x:Name="PageTitle"
+                               Text="{DynamicResource S.Nav.Recipes}"
+                               FontSize="15" FontWeight="Bold"
+                               VerticalAlignment="Center"
+                               Margin="0,0,12,0"/>
+
+                    <!-- Динамические кнопки — прокручиваемые если много кнопок -->
+                    <ScrollViewer Grid.Column="2"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled">
+                        <StackPanel x:Name="TopbarActions"
+                                    Orientation="Horizontal"/>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Контент страниц -->
+            <Grid Grid.Row="1">
+
+                <!-- ── Страница: Рецепты ──────────────────────────────── -->
+                <Grid x:Name="Page_Recipes" Margin="8" Visibility="Visible">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="280"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Style="{StaticResource Card}" Grid.Column="0">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                                <TextBox x:Name="RecipeSearchBox"
+                                         TextChanged="RecipeSearchBox_TextChanged"
+                                         ToolTip="Поиск по названию, категории или результату"/>
+                            </StackPanel>
+                            <ListBox x:Name="RecipesList" PreviewMouseRightButtonUp="ListBox_RightClick"
+                                 Background="{DynamicResource InputBackground}"
+                                 Foreground="{DynamicResource TextBrush}"
+                                 BorderBrush="{DynamicResource BorderBrushSoft}"
+                                     DisplayMemberPath="RECIPE_NAME"
+                                     SelectionChanged="RecipesList_SelectionChanged"/>
+                        </DockPanel>
+                    </Border>
+
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel DataContext="{Binding SelectedItem, ElementName=RecipesList}"
+                                    Margin="4,0,0,0">
+                            <UniformGrid Columns="3">
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource S.Recipe.BasicInfo}" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{DynamicResource S.F.RecipeName}"/>
+                                        <TextBox Text="{Binding RECIPE_NAME, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="{DynamicResource S.F.Description}" Margin="0,4,0,0"/>
+                                        <TextBox Text="{Binding DESCRIPTION, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="50"/>
+                                        <TextBlock Text="{DynamicResource S.F.Category}" Margin="0,4,0,0"/>
+                                        <TextBox Text="{Binding CATEGORY, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="{DynamicResource S.F.Result}" Margin="0,4,0,0"/>
+                                        <ComboBox x:Name="ResultComboBox"
+                                                  IsEditable="True" IsTextSearchEnabled="False"
+                                                  StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                  Text="{Binding RESULT, UpdateSourceTrigger=PropertyChanged}"
+                                                  PreviewKeyUp="ResultComboBox_PreviewKeyUp"
+                                                  SelectionChanged="ResultComboBox_SelectionChanged"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource S.Recipe.ResultTime}" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{DynamicResource S.F.ResultCount}"/>
+                                        <TextBox Text="{Binding RESULT_COUNT, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="{DynamicResource S.F.ResultHealth}" Margin="0,4,0,0"/>
+                                        <TextBox Text="{Binding RESULT_HEALTH, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="{DynamicResource S.F.TimeToCreate}" Margin="0,4,0,0"/>
+                                        <TextBox Text="{Binding TIME_TO_CREATE, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="{DynamicResource S.F.GivePoints}" Margin="0,4,0,0"/>
+                                        <TextBox Text="{Binding GIVE_POINTS, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource S.Recipe.Blueprint}" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{DynamicResource S.F.Plan}"/>
+                                        <ComboBox x:Name="PlanComboBox"
+                                                  IsEditable="True" IsTextSearchEnabled="False"
+                                                  StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                  Text="{Binding PLAN, UpdateSourceTrigger=PropertyChanged}"
+                                                  PreviewKeyUp="PlanComboBox_PreviewKeyUp"
+                                                  SelectionChanged="PlanComboBox_SelectionChanged"/>
+                                        <TextBlock Text="{DynamicResource S.F.DamageToPlan}" Margin="0,4,0,0"/>
+                                        <TextBox Text="{Binding DAMAGE_TO_PLAN, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="{DynamicResource S.F.Ability}" Margin="0,4,0,0"/>
+                                        <TextBox Text="{Binding ABILITY, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="{DynamicResource S.F.RequiredLevel}" Margin="0,4,0,0"/>
+                                        <TextBox Text="{Binding REQUIRED_LEVEL, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+                            <UniformGrid Columns="2">
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource S.Recipe.Flags}" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <UniformGrid Columns="2">
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.WeaponRepair}"/><TextBox Text="{Binding WEAPON_REPAIR, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.OtherRepair}"/><TextBox Text="{Binding OTHER_REPAIR, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.Dismantle}"/><TextBox Text="{Binding DISMANTLE, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.RemoteCraft}"/><TextBox Text="{Binding REMOTE_CRAFT, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.NeedElectricity}"/><TextBox Text="{Binding NEED_ELECTRICITY, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.NeedSpecialItems}"/><TextBox Text="{Binding NEED_SPECIAL_ITEMS, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                        </UniformGrid>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource S.Recipe.Params}" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <UniformGrid Columns="2">
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.NeedCountKit}"/><TextBox Text="{Binding NEED_COUNT_KIT, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.ResultLiquid}"/><TextBox Text="{Binding RESULT_LIQUID, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.LiquidType}"/><TextBox Text="{Binding LIQUID_TYPE, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.MinConsumption}"/><TextBox Text="{Binding MIN_CONSUMPTION, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.MaxConsumption}"/><TextBox Text="{Binding MAX_CONSUMPTION, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                        </UniformGrid>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+                            <UniformGrid Columns="3">
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource S.Recipe.Tools}" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <ComboBox x:Name="ToolAutoCompleteBox" Width="150"
+                                                      IsEditable="True" IsTextSearchEnabled="False"
+                                                      StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                      PreviewKeyUp="ToolAutoCompleteBox_PreviewKeyUp"/>
+                                            <Button Content="+" Click="AddTool_Click"/>
+                                            <Button Content="✕" Style="{StaticResource DangerButton}" Click="DeleteTool_Click"/>
+                                        </StackPanel>
+                                        <UniformGrid Columns="2">
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.MinToolsDmg}"/><TextBox Text="{Binding MIN_TOOLS_DAMAGE, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.MaxToolsDmg}"/><TextBox Text="{Binding MAX_TOOLS_DAMAGE, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                        </UniformGrid>
+                                        <ListBox x:Name="ToolsList" PreviewMouseRightButtonUp="ListBox_RightClick" Height="110" ItemsSource="{Binding TOOLS}"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource S.Recipe.Kits}" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <ComboBox x:Name="KitItemCombo" Width="150"
+                                                      IsEditable="True" IsTextSearchEnabled="False"
+                                                      StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                      PreviewKeyUp="KitItemCombo_PreviewKeyUp"/>
+                                            <Button Content="+" Click="AddKitItem_Click"/>
+                                            <Button Content="✕" Style="{StaticResource DangerButton}" Click="DeleteKitItem_Click"/>
+                                        </StackPanel>
+                                        <ListBox x:Name="KitItemsList" PreviewMouseRightButtonUp="ListBox_RightClick" Height="165" ItemsSource="{Binding NEEDS_KIT_ITEMS}"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource S.Recipe.Special}" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <ComboBox x:Name="SpecialItemCombo" Width="150"
+                                                      IsEditable="True" IsTextSearchEnabled="False"
+                                                      StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                      PreviewKeyUp="SpecialItemCombo_PreviewKeyUp"/>
+                                            <Button Content="+" Click="AddSpecialItem_Click"/>
+                                            <Button Content="✕" Style="{StaticResource DangerButton}" Click="DeleteSpecialItem_Click"/>
+                                        </StackPanel>
+                                        <UniformGrid Columns="2">
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.MinAttachDmg}"/><TextBox Text="{Binding MIN_ATTACHMENT_DAMAGE, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                            <StackPanel><TextBlock Text="{DynamicResource S.F.MaxAttachDmg}"/><TextBox Text="{Binding MAX_ATTACHMENT_DAMAGE, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                                        </UniformGrid>
+                                        <ListBox x:Name="SpecialItemsList" PreviewMouseRightButtonUp="ListBox_RightClick" Height="90" ItemsSource="{Binding NEEDS_SPECIAL_ITEMS}"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+                            <Border Style="{StaticResource Card}">
+                                <StackPanel>
+                                    <TextBlock Text="{DynamicResource S.Recipe.Ingredients}" FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ComboBox x:Name="IngredientAutoCompleteBox" Width="280"
+                                                  IsEditable="True" IsTextSearchEnabled="False"
+                                                  StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                  PreviewKeyUp="IngredientAutoCompleteBox_PreviewKeyUp"/>
+                                        <Button Content="{DynamicResource S.Recipe.AddIngr}" Click="AddIngredientFromAutoComplete_Click" Margin="8,0,0,0"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}" Style="{StaticResource DangerButton}" Click="DeleteIngredient_Click" Margin="4,0,0,0"/>
+                                        <Button Content="{DynamicResource S.Btn.CheckRecipes}" Click="ValidateRecipes_Click" Margin="12,0,0,0"/>
+                                    </StackPanel>
+                                    <DataGrid x:Name="IngredientsGrid" PreviewMouseRightButtonUp="DataGrid_RightClick">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.ClassName}"      Binding="{Binding CLASSNAME,                  UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Count}"         Binding="{Binding ITEM_AMOUNT,                UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Energy}"        Binding="{Binding USE_ENERGY,                 UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.LiquidType}"       Binding="{Binding NEED_LIQUID,                UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.LiquidType}"   Binding="{Binding LIQUID_TYPE,                UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Btn.Destroy}"     Binding="{Binding DESTROY_ITEM,               UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Damage}"  Binding="{Binding CHANGE_HEALTH_ITEM_BY_CRAFT,UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ── Страница: Справочник предметов ────────────────── -->
+                <Grid x:Name="Page_Items" Margin="10" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <WrapPanel Margin="0,0,0,8">
+                        <Button Content="{DynamicResource S.Recipe.ToResult}"  Click="UseAsResult_Click"/>
+                        <Button Content="{DynamicResource S.Recipe.ToBlueprint}"     Click="UseAsPlan_Click"/>
+                        <Button Content="{DynamicResource S.Recipe.ToTool}" Click="UseAsTool_Click"/>
+                        <Button Content="{DynamicResource S.Recipe.ToIngredient}" Click="UseAsIngredient_Click"/>
+                        <Separator Width="1" Background="{DynamicResource BorderBrushSoft}" Margin="6,0"/>
+                        <TextBox x:Name="ItemDbSearchBox" Width="280" Margin="0,0,0,0"
+                                 TextChanged="ItemDbSearchBox_TextChanged"
+                                 ToolTip="Поиск по ClassName, названию, категории или моду"/>
+                        <Button Content="{DynamicResource S.Workshop.Title}" Click="ImportWorkshopClassnames_Click" Margin="6,0,0,0"/>
+                    </WrapPanel>
+                    <DataGrid x:Name="ItemsGrid" Grid.Row="1" PreviewMouseRightButtonUp="DataGrid_RightClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ClassName"   Binding="{Binding ClassName,   UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                            <DataGridTextColumn Header="{DynamicResource S.Col.Name}"    Binding="{Binding DisplayName,  UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                            <DataGridTextColumn Header="{DynamicResource S.Col.Category}"   Binding="{Binding Category,     UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                            <DataGridTextColumn Header="{DynamicResource S.Col.Mod}"         Binding="{Binding SourceMod,    UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                            <DataGridTextColumn Header="{DynamicResource S.Col.Comment}" Binding="{Binding Comment,      UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                            <DataGridCheckBoxColumn Header="★"       Binding="{Binding Favorite,     UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+                <!-- ── Заглушки для Quest System страниц (открываются в QuestSystemWindow) -->
+                <Grid x:Name="Page_Quests" Visibility="Collapsed">
+<Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Button Content="{DynamicResource S.Quest.AddQuest}"    Background="{DynamicResource AccentBrush}" Width="90" Click="AddQuest_Click"/>
+                            <Button Content="{DynamicResource S.Btn.Copy}" Width="90" Click="DuplicateQuest_Click"/>
+                            <Button Content="{DynamicResource S.Btn.Delete}"    Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteQuest_Click"/>
+                        </StackPanel>
+                        <ListBox x:Name="QuestsList"
+                                 Background="{DynamicResource InputBackground}"
+                                 Foreground="{DynamicResource TextBrush}"
+                                 BorderBrush="{DynamicResource BorderBrushSoft}" Grid.Row="1"
+                                 DisplayMemberPath="QUEST_NAME"
+                                 SelectionChanged="QuestsList_SelectionChanged"/>
+                    </Grid>
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="QuestDetailPanel" Margin="10,0,0,0" IsEnabled="False">
+
+                            <GroupBox Header="{DynamicResource S.Recipe.BasicInfo}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="130"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="120"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource S.F.QuestName}"/>
+                                    <TextBox x:Name="QN_Name" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" TextChanged="QuestField_Changed" Tag="QUEST_NAME"/>
+                                    <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource S.F.DescShort}"/>
+                                    <TextBox x:Name="QN_DescShort" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" TextChanged="QuestField_Changed" Tag="DESCRIPTION_SHORT"/>
+                                    <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource S.F.GlobalType}"/>
+                                    <ComboBox x:Name="QN_GlobalType" Grid.Row="2" Grid.Column="1"
+                                              SelectionChanged="QN_GlobalType_Changed">
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type1}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type2}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type3}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type4}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type5}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type6}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type7}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type8}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type9}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type10}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type11}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type12}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type13}"/>
+                                        <ComboBoxItem Content="{DynamicResource S.Quest.Type14}"/>
+                                    </ComboBox>
+                                    <Label Grid.Row="2" Grid.Column="2" Content="{DynamicResource S.F.ReloadQuest}"/>
+                                    <TextBox x:Name="QN_Reload" Grid.Row="2" Grid.Column="3" TextChanged="QuestField_Changed" Tag="RELOAD_QUEST"/>
+                                    <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource S.F.TimeLimit}"/>
+                                    <TextBox x:Name="QN_TimeLimit" Grid.Row="3" Grid.Column="1" TextChanged="QuestField_Changed" Tag="TIME_LIMIT_FOR_QUEST"/>
+                                    <Label Grid.Row="3" Grid.Column="2" Content="{DynamicResource S.F.CanCancel}"/>
+                                    <TextBox x:Name="QN_CanCancel" Grid.Row="3" Grid.Column="3" TextChanged="QuestField_Changed" Tag="CAN_CANCEL_QUEST"/>
+                                    <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource S.F.QuestRequired}"/>
+                                    <TextBox x:Name="QN_Required" Grid.Row="4" Grid.Column="1" TextChanged="QuestField_Changed" Tag="QUEST_REQUIRED"/>
+                                    <Label Grid.Row="4" Grid.Column="2" Content="{DynamicResource S.F.Unavailable}"/>
+                                    <TextBox x:Name="QN_Unavailable" Grid.Row="4" Grid.Column="3" TextChanged="QuestField_Changed" Tag="QUEST_UNAVAILABLE"/>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.Quest.DescFull}">
+                                <TextBox x:Name="QN_Desc" Height="70" TextWrapping="Wrap"
+                                         AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                         TextChanged="QuestField_Changed" Tag="DESCRIPTION"/>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.Quest.RepSchedule}">
+                                <UniformGrid Columns="4">
+                                    <StackPanel><Label Content="{DynamicResource S.F.RepReward}"/><TextBox x:Name="QN_RepReward"  TextChanged="QuestField_Changed" Tag="REPUTATION_REWARD"/></StackPanel>
+                                    <StackPanel><Label Content="{DynamicResource S.F.RepPenalty}"/><TextBox x:Name="QN_RepPenalty" TextChanged="QuestField_Changed" Tag="REPUTATION_PENALTY"/></StackPanel>
+                                    <StackPanel><Label Content="{DynamicResource S.F.NeedRep}"/><TextBox x:Name="QN_NeedRep"    TextChanged="QuestField_Changed" Tag="NEED_REPUTATION"/></StackPanel>
+                                    <StackPanel><Label Content="{DynamicResource S.F.Unique}"/><TextBox x:Name="QN_Unique"     TextChanged="QuestField_Changed" Tag="UNIQUE"/></StackPanel>
+                                    <StackPanel><Label Content="{DynamicResource S.F.HourStart}"/><TextBox x:Name="QN_HStart"    TextChanged="QuestField_Changed" Tag="HOUR_START"/></StackPanel>
+                                    <StackPanel><Label Content="{DynamicResource S.F.MinStart}"/><TextBox x:Name="QN_MStart"    TextChanged="QuestField_Changed" Tag="MINUTE_START"/></StackPanel>
+                                    <StackPanel><Label Content="{DynamicResource S.F.HourFinish}"/><TextBox x:Name="QN_HFinish"   TextChanged="QuestField_Changed" Tag="HOUR_FINISH"/></StackPanel>
+                                    <StackPanel><Label Content="{DynamicResource S.F.MinFinish}"/><TextBox x:Name="QN_MFinish"   TextChanged="QuestField_Changed" Tag="MINUTE_FINISH"/></StackPanel>
+                                </UniformGrid>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.F.DayQuest}">
+                                <WrapPanel x:Name="DayQuestPanel">
+                                    <CheckBox Content="{DynamicResource S.F.Monday}"    Tag="Monday"    Checked="DayQuest_Changed" Unchecked="DayQuest_Changed"/>
+                                    <CheckBox Content="{DynamicResource S.F.Tuesday}"   Tag="Tuesday"   Checked="DayQuest_Changed" Unchecked="DayQuest_Changed"/>
+                                    <CheckBox Content="{DynamicResource S.F.Wednesday}" Tag="Wednesday" Checked="DayQuest_Changed" Unchecked="DayQuest_Changed"/>
+                                    <CheckBox Content="{DynamicResource S.F.Thursday}"  Tag="Thursday"  Checked="DayQuest_Changed" Unchecked="DayQuest_Changed"/>
+                                    <CheckBox Content="{DynamicResource S.F.Friday}"    Tag="Friday"    Checked="DayQuest_Changed" Unchecked="DayQuest_Changed"/>
+                                    <CheckBox Content="{DynamicResource S.F.Saturday}"  Tag="Saturday"  Checked="DayQuest_Changed" Unchecked="DayQuest_Changed"/>
+                                    <CheckBox Content="{DynamicResource S.F.Sunday}"    Tag="Sunday"    Checked="DayQuest_Changed" Unchecked="DayQuest_Changed"/>
+                                </WrapPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.Quest.Targets}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="160"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Button Content="{DynamicResource S.Quest.AddTarget}"        Background="{DynamicResource AccentBrush}" Width="80" Click="AddTarget_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Edit}" Width="110" Click="EditTarget_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}"       Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteTarget_Click"/>
+                                        <TextBlock Text="{DynamicResource S.DoubleClickHint}"
+                                                   Foreground="{DynamicResource MutedTextBrush}" FontSize="11" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <DataGrid x:Name="TargetsGrid" Grid.Row="1" MouseDoubleClick="TargetsGrid_MouseDoubleClick" PreviewMouseRightButtonUp="DataGrid_RightClick">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Type}"  Binding="{Binding TYPE_QUEST}" Width="80"/>
+                                            <DataGridTextColumn Header="TYPE_OBJECT" Binding="{Binding TYPE_OBJECT}" Width="*"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Name}"    Binding="{Binding TYPE_NAME_OVERRIDE}" Width="130"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Description}"    Binding="{Binding DESCRIPTION}" Width="130"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.Count}"       Binding="{Binding COUNT}" Width="60"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.NeedLiq}"    Binding="{Binding NEED_LIQUID}" Width="80"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.GeneralSettings}"    Binding="{Binding SETTINGS}" Width="150"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.Image}"       Binding="{Binding IMAGE_OVERRIDE}" Width="150"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.Quest.Rewards}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="130"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <ComboBox x:Name="RewardItemCombo" Width="260"
+                                                  IsEditable="True" IsTextSearchEnabled="False"
+                                                  StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                  PreviewKeyUp="RewardItemCombo_PreviewKeyUp"
+                                                  ToolTip="TYPE_OBJECT для новой награды"/>
+                                        <Button Content="{DynamicResource S.Quest.AddReward}" Background="{DynamicResource AccentBrush}" Width="90" Click="AddReward_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}"   Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteReward_Click"/>
+                                    </StackPanel>
+                                    <DataGrid x:Name="RewardsGrid" Grid.Row="1" PreviewMouseRightButtonUp="DataGrid_RightClick">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="TYPE_OBJECT"  Binding="{Binding TYPE_OBJECT, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.Count}"        Binding="{Binding COUNT, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.Quantity}"     Binding="{Binding QUANTITY, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Name}"     Binding="{Binding TYPE_NAME_OVERRIDE, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Description}"     Binding="{Binding DESCRIPTION, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                                            <DataGridTextColumn Header="SET_LIQUID"   Binding="{Binding SET_LIQUID, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.Health}"       Binding="{Binding HEALTH_LEVEL, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.GeneralSettings}"     Binding="{Binding SETTINGS, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.Loot.CostQuest}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="110"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <ComboBox x:Name="CostItemCombo" Width="260"
+                                                  IsEditable="True" IsTextSearchEnabled="False"
+                                                  StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                  PreviewKeyUp="CostItemCombo_PreviewKeyUp"
+                                                  ToolTip="TYPE_OBJECT для стоимости"/>
+                                        <Button Content="{DynamicResource S.Loot.AddItem}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddCost_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}"   Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteCost_Click"/>
+                                    </StackPanel>
+                                    <DataGrid x:Name="CostGrid" Grid.Row="1" PreviewMouseRightButtonUp="DataGrid_RightClick">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="TYPE_OBJECT"   Binding="{Binding TYPE_OBJECT, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.Count}"         Binding="{Binding COUNT, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.NeedLiquid}"   Binding="{Binding NEED_LIQUID, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.NameOverride}" Binding="{Binding NAME_OVERRIDE, UpdateSourceTrigger=PropertyChanged}" Width="130"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.GeneralSettings}"      Binding="{Binding SETTINGS, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </GroupBox>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+                </Grid>
+                <Grid x:Name="Page_NPC" Visibility="Collapsed">
+<Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="260"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Button Content="{DynamicResource S.NPC.AddNPC}"      Background="{DynamicResource AccentBrush}" Width="80" Click="AddNpc_Click"/>
+                            <Button Content="{DynamicResource S.Btn.Delete}"    Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteNpc_Click"/>
+                            <Button Content="{DynamicResource S.Btn.Copy}" Width="90" Click="DuplicateNpc_Click"/>
+                        </StackPanel>
+                        <ListBox x:Name="NpcList"
+                                 Background="{DynamicResource InputBackground}"
+                                 Foreground="{DynamicResource TextBrush}"
+                                 BorderBrush="{DynamicResource BorderBrushSoft}" Grid.Row="1"
+                                 DisplayMemberPath="NPC_NAME"
+                                 SelectionChanged="NpcList_SelectionChanged"/>
+                    </Grid>
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="NpcDetailPanel" Margin="10,0,0,0" IsEnabled="False">
+
+                            <GroupBox Header="{DynamicResource S.Recipe.BasicInfo}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource S.F.NpcId}"/>
+                                    <TextBox x:Name="NN_Id" Grid.Row="0" Grid.Column="1" IsReadOnly="True" Opacity="0.6"/>
+                                    <Label Grid.Row="0" Grid.Column="2" Content="{DynamicResource S.F.NpcType}"/>
+                                    <TextBox x:Name="NN_Type" Grid.Row="0" Grid.Column="3" TextChanged="NpcField_Changed" Tag="NPC_TYPE"/>
+                                    <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource S.F.NpcName}"/>
+                                    <TextBox x:Name="NN_Name" Grid.Row="1" Grid.Column="1" TextChanged="NpcField_Changed" Tag="NPC_NAME"/>
+                                    <Label Grid.Row="1" Grid.Column="2" Content="{DynamicResource S.F.NpcNameAction}"/>
+                                    <TextBox x:Name="NN_NameAction" Grid.Row="1" Grid.Column="3" TextChanged="NpcField_Changed" Tag="NPC_NAME_FOR_ACTION"/>
+                                    <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource S.F.NpcRole}"/>
+                                    <TextBox x:Name="NN_Role" Grid.Row="2" Grid.Column="1" TextChanged="NpcField_Changed" Tag="NPC_ROLE"/>
+                                    <Label Grid.Row="2" Grid.Column="2" Content="{DynamicResource S.F.EnableTransfer}"/>
+                                    <TextBox x:Name="NN_Transfer" Grid.Row="2" Grid.Column="3" TextChanged="NpcField_Changed" Tag="ENABLE_TRANSFER"/>
+                                    <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource S.F.Position}"/>
+                                    <TextBox x:Name="NN_Pos" Grid.Row="3" Grid.Column="1" TextChanged="NpcField_Changed" Tag="POSITION"/>
+                                    <Label Grid.Row="3" Grid.Column="2" Content="{DynamicResource S.F.Orientation}"/>
+                                    <TextBox x:Name="NN_Orient" Grid.Row="3" Grid.Column="3" TextChanged="NpcField_Changed" Tag="ORIENTATION"/>
+                                    <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource S.F.NpcAvatarPath}"/>
+                                    <TextBox x:Name="NN_Avatar" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" TextChanged="NpcField_Changed" Tag="NPC_AVATAR_PATH"/>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.F.NpcDescription}">
+                                <TextBox x:Name="NN_Desc" Height="55" TextWrapping="Wrap"
+                                         AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                         TextChanged="NpcField_Changed" Tag="NPC_DESCRIPTION"/>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.Player.QuestsRep}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/><RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource S.F.QuestStart}"/>
+                                    <TextBox x:Name="NN_QStart" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" TextChanged="NpcField_Changed" Tag="QUEST_START"/>
+                                    <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource S.F.QuestFinish}"/>
+                                    <TextBox x:Name="NN_QFinish" Grid.Row="1" Grid.Column="1" TextChanged="NpcField_Changed" Tag="QUEST_FINISH"/>
+                                    <Label Grid.Row="1" Grid.Column="2" Content="{DynamicResource S.F.LowHighRep}"/>
+                                    <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal">
+                                        <TextBox x:Name="NN_RepLow" Width="80" TextChanged="NpcField_Changed" Tag="REP_LOW"/>
+                                        <TextBlock Text=" / " VerticalAlignment="Center" Margin="4,0"/>
+                                        <TextBox x:Name="NN_RepHigh" Width="80" TextChanged="NpcField_Changed" Tag="REP_HIGH"/>
+                                    </StackPanel>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.NPC.Attachments}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="100"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <ComboBox x:Name="NpcAttachCombo" Width="280" Margin="0,0,6,0"
+                                                  IsEditable="True" IsTextSearchEnabled="False"
+                                                  StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                  PreviewKeyUp="NpcAttachCombo_PreviewKeyUp"/>
+                                        <Button Content="{DynamicResource S.Btn.Add}" Width="90" Click="AddNpcAttach_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteNpcAttach_Click"/>
+                                    </StackPanel>
+                                    <ListBox x:Name="NpcAttachList" PreviewMouseRightButtonUp="ListBox_RightClick" Grid.Row="1"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,5"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="{DynamicResource S.NPC.DialogSettings}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="120"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Button Content="{DynamicResource S.NPC.AddDialog}" Background="{DynamicResource AccentBrush}" Width="90" Click="AddNpcDialog_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}"  Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteNpcDialog_Click"/>
+                                        <TextBlock Text="  ID: first, quest, final, quit — зарезервированы"
+                                                   Foreground="{DynamicResource MutedTextBrush}" FontSize="11" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <DataGrid x:Name="NpcDialogsGrid" Grid.Row="1"
+                                              Background="{DynamicResource PanelBackground}"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              RowBackground="{DynamicResource PanelBackground}"
+                                              AlternatingRowBackground="{DynamicResource PanelBackground2}"
+                                              BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{DynamicResource S.F.Id}"            Binding="{Binding ID, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.TextNorm}" Binding="{Binding NPC_TEXT_NORMAL, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.TextLow}" Binding="{Binding NPC_TEXT_LOW_REPUTATION, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.TextHigh}"  Binding="{Binding NPC_TEXT_HIGH_REPUTATION, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="{DynamicResource S.Col.Answers}"       Binding="{Binding ANSWERS.Count}" Width="70"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </GroupBox>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+                </Grid>
+                <Grid x:Name="Page_Loot" Visibility="Collapsed">
+<Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="240"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Button Content="{DynamicResource S.Loot.AddPreset}"  Background="{DynamicResource AccentBrush}" Width="90" Click="AddLootPreset_Click"/>
+                            <Button Content="{DynamicResource S.Btn.Delete}"   Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteLootPreset_Click"/>
+                        </StackPanel>
+                        <ListBox x:Name="LootPresetsList"
+                                 Background="{DynamicResource InputBackground}"
+                                 Foreground="{DynamicResource TextBrush}"
+                                 BorderBrush="{DynamicResource BorderBrushSoft}" Grid.Row="1" SelectionChanged="LootPresetsList_SelectionChanged"/>
+                    </Grid>
+                    <Grid Grid.Column="1" Margin="10,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <GroupBox Header="{DynamicResource S.Loot.StashPos}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="90"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <TextBlock Text="X" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                    <TextBox x:Name="StashPosX" Width="70" Margin="0,0,4,0" ToolTip="X координата"/>
+                                    <TextBlock Text="Y" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                    <TextBox x:Name="StashPosY" Width="70" Margin="0,0,4,0" ToolTip="Y координата"/>
+                                    <TextBlock Text="Z" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                    <TextBox x:Name="StashPosZ" Width="70" Margin="0,0,6,0" ToolTip="Z координата"/>
+                                    <Button Content="{DynamicResource S.Btn.Add}" Width="80" Click="AddStashPos_Click"/>
+                                    <Button Content="{DynamicResource S.Btn.Delete}"  Width="80" Click="DeleteStashPos_Click"/>
+                                </StackPanel>
+                                <ListBox x:Name="StashPosList" Grid.Row="1"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,5"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="{DynamicResource S.Loot.ItemsList}" Grid.Row="1">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox x:Name="LootItemCombo" Width="260" Margin="0,0,6,0"
+                                          IsEditable="True" IsTextSearchEnabled="False"
+                                          StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                          PreviewKeyUp="LootItemCombo_PreviewKeyUp"
+                                          ToolTip="CLASSNAME для нового предмета"/>
+                                <Button Content="{DynamicResource S.Loot.AddItem}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddLootItem_Click"/>
+                                <Button Content="{DynamicResource S.Btn.Delete}"   Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteLootItem_Click"/>
+                            </StackPanel>
+                        </GroupBox>
+                        <DataGrid x:Name="LootItemsGrid" Grid.Row="2" PreviewMouseRightButtonUp="DataGrid_RightClick">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{DynamicResource S.F.ClassName}"    Binding="{Binding CLASSNAME, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridTextColumn Header="{DynamicResource S.F.Chance01}" Binding="{Binding CHANCE_TO_CREATE, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                                <DataGridTextColumn Header="{DynamicResource S.F.Count}"        Binding="{Binding COUNT_ITEM, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                                <DataGridTextColumn Header="{DynamicResource S.F.Health01}" Binding="{Binding HEALTH_ITEM, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                                <DataGridCheckBoxColumn Header="{DynamicResource S.F.HasQty}"  Binding="{Binding HAS_QUANTITY, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                                <DataGridTextColumn Header="{DynamicResource S.F.Quantity}"     Binding="{Binding QUANTITY_ITEM, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+                </Grid>
+                <Grid x:Name="Page_Triggers" Visibility="Collapsed">
+<Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <GroupBox Header="{DynamicResource S.Trig.TrigSettings}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <Button Content="{DynamicResource S.Trig.AddTrigger}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddTrigger_Click"/>
+                                <Button Content="{DynamicResource S.Btn.Delete}"   Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteTrigger_Click"/>
+                            </StackPanel>
+                            <DataGrid x:Name="TriggersGrid" Grid.Row="1">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="{DynamicResource S.F.Id}"          Binding="{Binding TRIGGER_ID}" Width="50"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.Position}"     Binding="{Binding POSITION, UpdateSourceTrigger=PropertyChanged}" Width="180"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.Radius}"      Binding="{Binding RADIUS, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.Notification}" Binding="{Binding NOTIFICATION_TEXT, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.Show}" Binding="{Binding TIME_SHOW_NOTIFICATION, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.Delay}"    Binding="{Binding DELAY_SPAWN, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.AICount}"   Binding="{Binding AI_SETTINGS.COUNT_AI}" Width="80"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.RadiusAI}"   Binding="{Binding AI_SPAWN_RADIUS, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="{DynamicResource S.Trig.MappingSettings}" Grid.Row="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <Button Content="{DynamicResource S.NPC.AddGroup}" Background="{DynamicResource AccentBrush}" Width="90" Click="AddMappingGroup_Click"/>
+                                <Button Content="{DynamicResource S.Btn.Delete}"  Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteMappingGroup_Click"/>
+                            </StackPanel>
+                            <DataGrid x:Name="MappingGrid" Grid.Row="1">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="{DynamicResource S.F.GroupId}"  Binding="{Binding GROUP_ID}" Width="80"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.Name}"  Binding="{Binding GROUP_NAME, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                                    <DataGridTextColumn Header="{DynamicResource S.Col.Objects}"  Binding="{Binding MAPPING_ITEMS.Count}" Width="80"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+                </Grid>
+                <Grid x:Name="Page_Player" Visibility="Collapsed">
+<Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <Label Content="{DynamicResource S.Items.SteamID}"/>
+                        <TextBlock x:Name="PlayerSteamIdText" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <Label Content="{DynamicResource S.Items.Reputation}"/>
+                        <TextBlock x:Name="PlayerReputationText" Foreground="#F0C040" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" Text="{DynamicResource S.Player.InProgress}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"/>
+                    <DataGrid x:Name="InProgressGrid" Grid.Row="2" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{DynamicResource S.F.Id}"             Binding="{Binding ID}" Width="60"/>
+                            <DataGridTextColumn Header="SYSTEM_ID"      Binding="{Binding SYSTEM_ID}" Width="120"/>
+                            <DataGridTextColumn Header="{DynamicResource S.F.IsFinish}"      Binding="{Binding IS_FINISH}" Width="80"/>
+                            <DataGridTextColumn Header="{DynamicResource S.Quest.Progress}" Binding="{Binding ProgressDisplay}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Grid Grid.Row="3" Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{DynamicResource S.Player.Completed}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"/>
+                            <DataGrid x:Name="FinishedGrid" IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="{DynamicResource S.F.Id}"        Binding="{Binding ID}" Width="60"/>
+                                    <DataGridTextColumn Header="SYSTEM_ID" Binding="{Binding SYSTEM_ID}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="{DynamicResource S.Player.Failed}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,4"/>
+                            <DataGrid x:Name="FailedGrid" IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="{DynamicResource S.F.Id}"        Binding="{Binding ID}" Width="60"/>
+                                    <DataGridTextColumn Header="SYSTEM_ID" Binding="{Binding SYSTEM_ID}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+                </Grid>
+                <Grid x:Name="Page_GmConfig" Visibility="Collapsed" Margin="14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TabControl>
+                        <TabItem Header="{DynamicResource S.GmConfig.Categories}">
+                            <Grid Margin="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Button Content="{DynamicResource S.GmConfig.AddCategory}" Background="{DynamicResource AccentBrush}" Width="170" Click="AddCategory_Click"/>
+                                    <Button Content="{DynamicResource S.GmConfig.DelCategory}"    Background="{DynamicResource DangerBrush}" Width="160" Click="DeleteCategory_Click"/>
+                                </StackPanel>
+                                <DataGrid x:Name="CategoriesGrid" Grid.Row="1" SelectionMode="Single" SelectionUnit="FullRow"/>
+                            </Grid>
+                        </TabItem>
+
+                        <TabItem Header="{DynamicResource S.GmConfig.Tables}">
+                            <Grid Margin="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Button Content="{DynamicResource S.GmConfig.AddTable}" Background="{DynamicResource AccentBrush}" Width="150" Click="AddCraftTable_Click"/>
+                                    <Button Content="{DynamicResource S.GmConfig.DelTable}"    Background="{DynamicResource DangerBrush}" Width="140" Click="DeleteCraftTable_Click"/>
+                                </StackPanel>
+                                <DataGrid x:Name="CraftTablesGrid" Grid.Row="1" SelectionMode="Single" SelectionUnit="FullRow"/>
+                            </Grid>
+                        </TabItem>
+
+                        <TabItem Header="{DynamicResource S.GmConfig.Admins}">
+                            <Grid Margin="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBox x:Name="AdminIdText" Width="300" Margin="0,0,10,0"/>
+                                    <Button Content="{DynamicResource S.GmConfig.AddAdmin}" Background="{DynamicResource AccentBrush}" Width="160" Click="AddAdminId_Click"/>
+                                    <Button Content="{DynamicResource S.GmConfig.DelAdmin}"    Background="{DynamicResource DangerBrush}" Width="150" Click="DeleteAdminId_Click"/>
+                                </StackPanel>
+                                <ListBox x:Name="AdminIdsList" Grid.Row="1"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}"/>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+
+                    <TextBlock x:Name="GmConfigStatus" Grid.Row="1" Margin="0,8,0,0"
+                               Foreground="{DynamicResource MutedTextBrush}" Text="{DynamicResource S.Status.Ready}"/>
+                </Grid>
+
+
+                <!-- ── Страница: Medicine Config ──────────────────────── -->
+                <Grid x:Name="Page_Medicine" Visibility="Collapsed" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <WrapPanel Margin="0,0,0,8">
+                        <TextBox x:Name="MedicineSearchBox" Width="240"
+                                 TextChanged="MedicineSearchBox_TextChanged"
+                                 ToolTip="Поиск по ключу"/>
+                        <ComboBox x:Name="MedicineSectionCombo" Width="220" Margin="8,0,0,0"
+                                  SelectionChanged="MedicineSectionCombo_Changed"
+                                  ToolTip="Фильтр по секции"/>
+                    </WrapPanel>
+                    <DataGrid x:Name="MedicineGrid" Grid.Row="1"
+                              CellEditEnding="MedicineGrid_CellEditEnding">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{DynamicResource S.Col.Key}"       Binding="{Binding ShownKey}"   Width="*" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="Normal"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSection}" Value="True">
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource S.Search.ColValue}" Binding="{Binding Value}" Width="*">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSection}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+                                                <Setter Property="Background" Value="{DynamicResource PanelBackground2}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource S.Validation.ColType}"      Binding="{Binding Kind}"  Width="80" IsReadOnly="True"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+                <!-- ── Страница: Ability Config ───────────────────────── -->
+                <Grid x:Name="Page_Ability" Visibility="Collapsed" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <GroupBox Header="{DynamicResource S.Settings.GlobalNPC}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource S.F.ConfigVersion}"/>
+                            <TextBox x:Name="AB_Version" Grid.Row="0" Grid.Column="1" TextChanged="AbilityField_Changed" Tag="CONFIG_VERSION"/>
+                            <Label Grid.Row="0" Grid.Column="2" Content="{DynamicResource S.F.Map}"/>
+                            <TextBox x:Name="AB_Map" Grid.Row="0" Grid.Column="3" TextChanged="AbilityField_Changed" Tag="MAP"/>
+                            <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource S.F.SaveAbilityOnDeath}"/>
+                            <TextBox x:Name="AB_SaveOnDeath" Grid.Row="1" Grid.Column="1" TextChanged="AbilityField_Changed" Tag="SaveAbilityPointsOnDeath"/>
+                            <Label Grid.Row="1" Grid.Column="2" Content="{DynamicResource S.F.EnablePeriodSave}"/>
+                            <TextBox x:Name="AB_EnablePeriod" Grid.Row="1" Grid.Column="3" TextChanged="AbilityField_Changed" Tag="Enable_PeriodSave"/>
+                            <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource S.F.PeriodAutoSave}"/>
+                            <TextBox x:Name="AB_PeriodSave" Grid.Row="2" Grid.Column="1" TextChanged="AbilityField_Changed" Tag="Period_OnlineAutoSave"/>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+
+                <!-- ── Страница: Liquid Config ────────────────────────── -->
+                <Grid x:Name="Page_Liquid" Visibility="Collapsed" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <WrapPanel Margin="0,0,0,8">
+                        <TextBox x:Name="LiquidSearchBox" Width="240"
+                                 TextChanged="LiquidSearchBox_TextChanged"
+                                 ToolTip="Поиск по ключу"/>
+                        <ComboBox x:Name="LiquidSectionCombo" Width="220" Margin="8,0,0,0"
+                                  SelectionChanged="LiquidSectionCombo_Changed"
+                                  ToolTip="Фильтр по секции (каждый тип жидкости)"/>
+                    </WrapPanel>
+                    <DataGrid x:Name="LiquidGrid" Grid.Row="1"
+                              CellEditEnding="LiquidGrid_CellEditEnding">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{DynamicResource S.Col.Key}"     Binding="{Binding ShownKey}"   Width="*" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSection}" Value="True">
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource S.Search.ColValue}" Binding="{Binding Value}" Width="200">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSection}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+                                                <Setter Property="Background" Value="{DynamicResource PanelBackground2}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{DynamicResource S.Validation.ColType}"      Binding="{Binding Kind}"  Width="70" IsReadOnly="True"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+                <!-- ── Страница: Food Config ──────────────────────────── -->
+                <Grid x:Name="Page_Food" Visibility="Collapsed" Margin="10">
+                    <TabControl>
+                        <TabItem Header="{DynamicResource S.Nav.Settings}">
+                            <Grid Margin="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="220"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Label Content="{DynamicResource S.F.CrateCan}"/>
+                                <TextBox x:Name="Food_CrateCan" Grid.Column="1" TextChanged="FoodField_Changed" Tag="CrateCanForEatingCan"/>
+                                <Label Grid.Row="1" Content="{DynamicResource S.F.ConfigVersion}"/>
+                                <TextBox x:Name="Food_Version" Grid.Row="1" Grid.Column="1" TextChanged="FoodField_Changed" Tag="CONFIG_VERSION" IsReadOnly="True" Opacity="0.6"/>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="{DynamicResource S.Settings.FryingPan}">
+                            <Grid Margin="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <ComboBox x:Name="FoodFryCombo" Width="260"
+                                              IsEditable="True" IsTextSearchEnabled="False"
+                                              StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                              PreviewKeyUp="FoodFryCombo_PreviewKeyUp"/>
+                                    <Button Content="{DynamicResource S.Btn.Add}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddFoodFryItem_Click"/>
+                                    <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteFoodFryItem_Click"/>
+                                </StackPanel>
+                                <ListBox x:Name="FoodFryList" PreviewMouseRightButtonUp="ListBox_RightClick" Grid.Row="1"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,5"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="{DynamicResource S.Settings.IRP}">
+                            <Grid Margin="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <ComboBox x:Name="FoodIRPCombo" Width="260"
+                                              IsEditable="True" IsTextSearchEnabled="False"
+                                              StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                              PreviewKeyUp="FoodIRPCombo_PreviewKeyUp"/>
+                                    <Button Content="{DynamicResource S.Btn.Add}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddFoodIRPItem_Click"/>
+                                    <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteFoodIRPItem_Click"/>
+                                </StackPanel>
+                                <ListBox x:Name="FoodIRPList" PreviewMouseRightButtonUp="ListBox_RightClick" Grid.Row="1"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,5"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="{DynamicResource S.Loot.Recipes}">
+                            <Grid Margin="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="280"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Button Content="{DynamicResource S.Recipe.AddRecipe}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddFoodRecipe_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}"  Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteFoodRecipe_Click"/>
+                                    </StackPanel>
+                                    <ListBox x:Name="FoodRecipesList" Grid.Row="1"
+                                             Background="{DynamicResource InputBackground}"
+                                             Foreground="{DynamicResource TextBrush}"
+                                             BorderBrush="{DynamicResource BorderBrushSoft}"
+                                             DisplayMemberPath="RESULT"
+                                             SelectionChanged="FoodRecipesList_SelectionChanged">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,6"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                                </Grid>
+                                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel x:Name="FoodRecipeDetail" Margin="10,0,0,0" IsEnabled="False">
+                                        <GroupBox Header="{DynamicResource S.Recipe.Result}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="160"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="140"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Label Content="{DynamicResource S.F.Result}"/>
+                                                <ComboBox x:Name="FR_Result" Grid.Column="1"
+                                                          IsEditable="True" IsTextSearchEnabled="False"
+                                                          StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                          PreviewKeyUp="FR_Result_PreviewKeyUp"
+                                                          SelectionChanged="FR_Result_SelectionChanged"/>
+                                                <Label Grid.Column="2" Content="{DynamicResource S.F.ResultQuantity}"/>
+                                                <TextBox x:Name="FR_Qty" Grid.Column="3" TextChanged="FoodRecipeField_Changed" Tag="RESULT_QUANTITY"/>
+                                                <Label Grid.Row="1" Content="SPECIAL_INGREDIENTS"/>
+                                                <ComboBox x:Name="FR_Special" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
+                                                          IsEditable="True" IsTextSearchEnabled="False"
+                                                          StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                          PreviewKeyUp="FR_Special_PreviewKeyUp"
+                                                          SelectionChanged="FR_Special_SelectionChanged"/>
+                                            </Grid>
+                                        </GroupBox>
+                                        <GroupBox Header="{DynamicResource S.Recipe.Ingredients}">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                    <ComboBox x:Name="FR_IngCombo" Width="220"
+                                                              IsEditable="True" IsTextSearchEnabled="False"
+                                                              StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                              PreviewKeyUp="FR_IngCombo_PreviewKeyUp"/>
+                                                    <Button Content="{DynamicResource S.Btn.Add}" Background="{DynamicResource AccentBrush}" Width="90" Click="AddFoodIngredient_Click"/>
+                                                    <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteFoodIngredient_Click"/>
+                                                </StackPanel>
+                                                <DataGrid x:Name="FoodIngredientsGrid" Grid.Row="1" MinHeight="120" PreviewMouseRightButtonUp="DataGrid_RightClick">
+                                                    <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="{DynamicResource S.F.Name}"           Binding="{Binding NAME, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                                        <DataGridTextColumn Header="{DynamicResource S.F.Quantity}"       Binding="{Binding QUANTITY, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                                        <DataGridCheckBoxColumn Header="{DynamicResource S.F.Boiled}"     Binding="{Binding REQUIRE_BOILED, UpdateSourceTrigger=PropertyChanged}" Width="65"/>
+                                                        <DataGridCheckBoxColumn Header="{DynamicResource S.F.Fresh}"      Binding="{Binding REQUIRE_FRESH, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                                                    </DataGrid.Columns>
+                                                </DataGrid>
+                                            </Grid>
+                                        </GroupBox>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+
+                <!-- ── Страница: MineRock Config ──────────────────────── -->
+                <Grid x:Name="Page_MineRock" Visibility="Collapsed" Margin="10">
+                    <TabControl>
+                        <TabItem Header="{DynamicResource S.Settings.General}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="8">
+                                    <GroupBox Header="{DynamicResource S.F.GeneralSettings}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="220"/><ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="{DynamicResource S.F.MeltingTemp}"/>
+                                            <TextBox x:Name="Mine_MeltTemp" Grid.Column="1" TextChanged="MineField_Changed" Tag="MELTING_TEMPERATURE"/>
+                                        </Grid>
+                                    </GroupBox>
+                                    <GroupBox Header="{DynamicResource S.Loot.ExtSettings}">
+                                        <UniformGrid Columns="2">
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceExtStone}"/><TextBox x:Name="Mine_ChanceStone" TextChanged="MineField_Changed" Tag="CHANCE_EXTRACTION_STONE"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceExtCoal}"/><TextBox x:Name="Mine_ChanceCoal" TextChanged="MineField_Changed" Tag="CHANCE_EXTRACTION_COAL"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceExtRare}"/><TextBox x:Name="Mine_ChanceRare" TextChanged="MineField_Changed" Tag="CHANCE_EXTRACTION_RARE"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.DamageToTools}"/><TextBox x:Name="Mine_DmgTools" TextChanged="MineField_Changed" Tag="EX_DAMAGE_TO_TOOLS"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.ExtractMinQty}"/><TextBox x:Name="Mine_ExtMin" TextChanged="MineField_Changed" Tag="EXTRACTION_MINIMUM_QUANTITY"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.ExtractMaxQty}"/><TextBox x:Name="Mine_ExtMax" TextChanged="MineField_Changed" Tag="EXTRACTION_MAXIMUM_QUANTITY"/></StackPanel>
+                                            <StackPanel><Label Content="ROCK_BASE_MIN"/><TextBox x:Name="Mine_RockMin" TextChanged="MineField_Changed" Tag="ROCK_BASE_MIN_QUANTITY"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.RockBaseMax}"/><TextBox x:Name="Mine_RockMax" TextChanged="MineField_Changed" Tag="ROCK_BASE_MAX_QUANTITY"/></StackPanel>
+                                        </UniformGrid>
+                                    </GroupBox>
+                                    <GroupBox Header="{DynamicResource S.Settings.Blacksmith}">
+                                        <UniformGrid Columns="4">
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceLvl0}"/><TextBox x:Name="Mine_BC0" TextChanged="MineField_Changed" Tag="BLACKSMITH_CHANCE_BONUS_LEVEL0"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceLvl1}"/><TextBox x:Name="Mine_BC1" TextChanged="MineField_Changed" Tag="BLACKSMITH_CHANCE_BONUS_LEVEL1"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceLvl2}"/><TextBox x:Name="Mine_BC2" TextChanged="MineField_Changed" Tag="BLACKSMITH_CHANCE_BONUS_LEVEL2"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceLvl3}"/><TextBox x:Name="Mine_BC3" TextChanged="MineField_Changed" Tag="BLACKSMITH_CHANCE_BONUS_LEVEL3"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.QtyLvl0}"/><TextBox x:Name="Mine_BQ0" TextChanged="MineField_Changed" Tag="BLACKSMITH_QUANTITY_BONUS_LEVEL0"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.QtyLvl1}"/><TextBox x:Name="Mine_BQ1" TextChanged="MineField_Changed" Tag="BLACKSMITH_QUANTITY_BONUS_LEVEL1"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.QtyLvl2}"/><TextBox x:Name="Mine_BQ2" TextChanged="MineField_Changed" Tag="BLACKSMITH_QUANTITY_BONUS_LEVEL2"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.QtyLvl3}"/><TextBox x:Name="Mine_BQ3" TextChanged="MineField_Changed" Tag="BLACKSMITH_QUANTITY_BONUS_LEVEL3"/></StackPanel>
+                                        </UniformGrid>
+                                    </GroupBox>
+                                    <GroupBox Header="{DynamicResource S.Loot.DigSettings}">
+                                        <UniformGrid Columns="3">
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceOfDig}"/><TextBox x:Name="Mine_DigChance" TextChanged="MineField_Changed" Tag="CHANCE_OF_DIG"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceOfDigSand}"/><TextBox x:Name="Mine_DigSand" TextChanged="MineField_Changed" Tag="CHANCE_OF_DIG_SAND"/></StackPanel>
+                                            <StackPanel><Label Content="{DynamicResource S.F.DigDamageTools}"/><TextBox x:Name="Mine_DigDmg" TextChanged="MineField_Changed" Tag="DIG_DAMAGE_TO_TOOLS"/></StackPanel>
+                                        </UniformGrid>
+                                    </GroupBox>
+                                    <GroupBox Header="{DynamicResource S.Loot.WashSettings}">
+                                        <UniformGrid Columns="3">
+                                            <StackPanel><Label Content="{DynamicResource S.F.ChanceForWash}"/><TextBox x:Name="Mine_WashChance" TextChanged="MineField_Changed" Tag="CHANCE_FOR_WASH"/></StackPanel>
+                                            <StackPanel><Label Content="WASHED_MIN_QUANTITY"/><TextBox x:Name="Mine_WashMin" TextChanged="MineField_Changed" Tag="WASHED_MINIMUM_QUANTITY"/></StackPanel>
+                                            <StackPanel><Label Content="WASHED_MAX_QUANTITY"/><TextBox x:Name="Mine_WashMax" TextChanged="MineField_Changed" Tag="WASHED_MAXIMUM_QUANTITY"/></StackPanel>
+                                        </UniformGrid>
+                                    </GroupBox>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem Header="{DynamicResource S.Loot.Extraction}">
+                            <Grid Margin="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <ComboBox x:Name="MineExtCombo" Width="280"
+                                              IsEditable="True" IsTextSearchEnabled="False"
+                                              StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                              PreviewKeyUp="MineExtCombo_PreviewKeyUp"/>
+                                    <Button Content="{DynamicResource S.Btn.Add}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddMineExtItem_Click"/>
+                                    <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteMineExtItem_Click"/>
+                                </StackPanel>
+                                <ListBox x:Name="MineExtList" PreviewMouseRightButtonUp="ListBox_RightClick" Grid.Row="1"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,5"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="{DynamicResource S.Loot.Wash}">
+                            <Grid Margin="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <ComboBox x:Name="MineWashCombo" Width="280"
+                                              IsEditable="True" IsTextSearchEnabled="False"
+                                              StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                              PreviewKeyUp="MineWashCombo_PreviewKeyUp"/>
+                                    <Button Content="{DynamicResource S.Btn.Add}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddMineWashItem_Click"/>
+                                    <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteMineWashItem_Click"/>
+                                </StackPanel>
+                                <ListBox x:Name="MineWashList" PreviewMouseRightButtonUp="ListBox_RightClick" Grid.Row="1"
+                                         Background="{DynamicResource InputBackground}"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,5"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="{DynamicResource S.Loot.Recipes}">
+                            <Grid Margin="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="240"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Button Content="{DynamicResource S.Recipe.AddRecipe}" Background="{DynamicResource AccentBrush}" Width="95" Click="AddMineRecipe_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}"  Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteMineRecipe_Click"/>
+                                    </StackPanel>
+                                    <ListBox x:Name="MineRecipesList" Grid.Row="1"
+                                             Background="{DynamicResource InputBackground}"
+                                             Foreground="{DynamicResource TextBrush}"
+                                             BorderBrush="{DynamicResource BorderBrushSoft}"
+                                             DisplayMemberPath="RECIPE_NAME"
+                                             SelectionChanged="MineRecipesList_SelectionChanged">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,6"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                                </Grid>
+                                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel x:Name="MineRecipeDetail" Margin="10,0,0,0" IsEnabled="False">
+                                        <GroupBox Header="{DynamicResource S.Recipe.BasicInfo}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/><ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="180"/><ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/><RowDefinition/><RowDefinition/>
+                                                </Grid.RowDefinitions>
+                                                <Label Content="{DynamicResource S.F.RecipeName}"/>
+                                                <TextBox x:Name="MR_Name" Grid.Column="1" Grid.ColumnSpan="3" TextChanged="MineRecipeField_Changed" Tag="RECIPE_NAME"/>
+                                                <Label Grid.Row="1" Content="{DynamicResource S.F.Result}"/>
+                                                <ComboBox x:Name="MR_Result" Grid.Row="1" Grid.Column="1"
+                                                          IsEditable="True" IsTextSearchEnabled="False"
+                                                          StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                          PreviewKeyUp="MR_Result_PreviewKeyUp"
+                                                          SelectionChanged="MR_Result_SelectionChanged"/>
+                                                <Label Grid.Row="1" Grid.Column="2" Content="{DynamicResource S.F.ResultQuantity}"/>
+                                                <TextBox x:Name="MR_ResultQty" Grid.Row="1" Grid.Column="3" TextChanged="MineRecipeField_Changed" Tag="RESULT_QUANTITY"/>
+                                                <Label Grid.Row="2" Content="SPECIAL_INGREDIENTS"/>
+                                                <ComboBox x:Name="MR_Special" Grid.Row="2" Grid.Column="1"
+                                                          IsEditable="True" IsTextSearchEnabled="False"
+                                                          StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                          PreviewKeyUp="MR_Special_PreviewKeyUp"
+                                                          SelectionChanged="MR_Special_SelectionChanged"/>
+                                                <Label Grid.Row="2" Grid.Column="2" Content="{DynamicResource S.F.DamageToIngredient}"/>
+                                                <TextBox x:Name="MR_DmgIng" Grid.Row="2" Grid.Column="3" TextChanged="MineRecipeField_Changed" Tag="DAMAGE_TO_INGREDIENT"/>
+                                            </Grid>
+                                        </GroupBox>
+                                        <GroupBox Header="{DynamicResource S.Recipe.Flags}">
+                                            <UniformGrid Columns="2">
+                                                <StackPanel><Label Content="{DynamicResource S.F.DeleteSpecialIngr}"/><TextBox x:Name="MR_DelSpecial" TextChanged="MineRecipeField_Changed" Tag="DELETE_SPECIAL_INGREDIENTS"/></StackPanel>
+                                                <StackPanel><Label Content="{DynamicResource S.F.DamageSpecialIngr}"/><TextBox x:Name="MR_DmgSpecial" TextChanged="MineRecipeField_Changed" Tag="DAMAGE_SPECIAL_INGREDIENTS"/></StackPanel>
+                                            </UniformGrid>
+                                        </GroupBox>
+                                        <GroupBox Header="{DynamicResource S.Recipe.Ingredients}">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="120"/>
+                                                </Grid.RowDefinitions>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                    <ComboBox x:Name="MR_IngCombo" Width="220"
+                                                              IsEditable="True" IsTextSearchEnabled="False"
+                                                              StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                                              PreviewKeyUp="MR_IngCombo_PreviewKeyUp"/>
+                                                    <TextBox x:Name="MR_IngQty" Width="60" Margin="4,0" ToolTip="Количество"/>
+                                                    <Button Content="{DynamicResource S.Btn.Add}" Background="{DynamicResource AccentBrush}" Width="90" Click="AddMineIngredient_Click"/>
+                                                    <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteMineIngredient_Click"/>
+                                                </StackPanel>
+                                                <DataGrid x:Name="MineIngredientsGrid" Grid.Row="1" PreviewMouseRightButtonUp="DataGrid_RightClick">
+                                                    <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="{DynamicResource S.F.Ingredient}" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                                        <DataGridTextColumn Header="{DynamicResource S.F.Quantity}"   Binding="{Binding Qty, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                                                    </DataGrid.Columns>
+                                                </DataGrid>
+                                            </Grid>
+                                        </GroupBox>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+
+                <!-- ── Страница: Rock Points ──────────────────────────── -->
+                <Grid x:Name="Page_RockPoints" Visibility="Collapsed" Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="280"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Button Content="{DynamicResource S.Mining.AddRockType}" Background="{DynamicResource AccentBrush}" Width="110" Click="AddRockObject_Click"/>
+                            <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteRockObject_Click"/>
+                        </StackPanel>
+                        <ListBox x:Name="RockObjectsList" Grid.Row="1"
+                                 Background="{DynamicResource InputBackground}"
+                                 Foreground="{DynamicResource TextBrush}"
+                                 BorderBrush="{DynamicResource BorderBrushSoft}"
+                                 DisplayMemberPath="CLASSNAME"
+                                 SelectionChanged="RockObjectsList_SelectionChanged">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,6"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                    </Grid>
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="RockObjectDetail" Margin="10,0,0,0" IsEnabled="False">
+                            <GroupBox Header="{DynamicResource S.Loot.ObjSettings}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="180"/><ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Label Content="{DynamicResource S.F.ClassName}"/>
+                                    <ComboBox x:Name="RO_Class" Grid.Column="1" Grid.ColumnSpan="3"
+                                              IsEditable="True" IsTextSearchEnabled="False"
+                                              StaysOpenOnEdit="True" DisplayMemberPath="ClassName"
+                                              PreviewKeyUp="RO_Class_PreviewKeyUp"
+                                              SelectionChanged="RO_Class_SelectionChanged"/>
+                                    <Label Grid.Row="1" Content="{DynamicResource S.F.MinObjectsOnMap}"/>
+                                    <TextBox x:Name="RO_Min" Grid.Row="1" Grid.Column="1" TextChanged="RockField_Changed" Tag="MIN_OBJECTS_ON_MAP"/>
+                                    <Label Grid.Row="1" Grid.Column="2" Content="{DynamicResource S.F.MaxObjectsOnMap}"/>
+                                    <TextBox x:Name="RO_Max" Grid.Row="1" Grid.Column="3" TextChanged="RockField_Changed" Tag="MAX_OBJECTS_ON_MAP"/>
+                                    <Label Grid.Row="2" Content="{DynamicResource S.F.RespawnTime}"/>
+                                    <TextBox x:Name="RO_Respawn" Grid.Row="2" Grid.Column="1" TextChanged="RockField_Changed" Tag="RESPAWN_TIME"/>
+                                    <Label Grid.Row="2" Grid.Column="2" Content="SPAWN_CHANCE (%)"/>
+                                    <TextBox x:Name="RO_SpawnChance" Grid.Row="2" Grid.Column="3" TextChanged="RockField_Changed" Tag="SPAWN_CHANCE"/>
+                                    <Label Grid.Row="3" Content="{DynamicResource S.F.MinExtractionAmt}"/>
+                                    <TextBox x:Name="RO_ExtMin" Grid.Row="3" Grid.Column="1" TextChanged="RockField_Changed" Tag="MIN_EXTRACTION_AMOUNT"/>
+                                    <Label Grid.Row="3" Grid.Column="2" Content="{DynamicResource S.F.MaxExtractionAmt}"/>
+                                    <TextBox x:Name="RO_ExtMax" Grid.Row="3" Grid.Column="3" TextChanged="RockField_Changed" Tag="MAX_EXTRACTION_AMOUNT"/>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Header="{DynamicResource S.Trig.SpawnPos}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="150"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="X" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                        <TextBox x:Name="RO_PosX" Width="80" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Y" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                        <TextBox x:Name="RO_PosY" Width="80" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Z" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource MutedTextBrush}"/>
+                                        <TextBox x:Name="RO_PosZ" Width="80" Margin="0,0,6,0"/>
+                                        <Button Content="{DynamicResource S.Btn.Add}" Background="{DynamicResource AccentBrush}" Width="90" Click="AddRockPos_Click"/>
+                                        <Button Content="{DynamicResource S.Btn.Delete}" Background="{DynamicResource DangerBrush}" Width="80" Click="DeleteRockPos_Click"/>
+                                    </StackPanel>
+                                    <ListBox x:Name="RockPosList" Grid.Row="1"
+                                             Background="{DynamicResource InputBackground}"
+                                             Foreground="{DynamicResource TextBrush}"
+                                             BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="8,5"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                                </Grid>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+
+                <!-- ── Страница: Карта ──────────────────────────────────── -->
+                <Grid x:Name="Page_Map" Visibility="Collapsed" Margin="14">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="🗺" FontSize="64" HorizontalAlignment="Center"
+                                   Margin="0,0,0,20" Foreground="{DynamicResource MutedTextBrush}"/>
+                        <TextBlock Text="{DynamicResource S.Map.Info}"
+                                   FontSize="22" FontWeight="Bold"
+                                   HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <TextBlock Text="{DynamicResource S.Map.Supports}"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                        <TextBlock Text="{DynamicResource S.Map.Supports}"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   HorizontalAlignment="Center" Margin="0,0,0,30"/>
+                        <Button Content="{DynamicResource S.Btn.OpenMap}"
+                                Style="{StaticResource AccentButton}"
+                                Width="200" Padding="16,10" FontSize="15"
+                                Click="OpenMapBtn_Click"
+                                HorizontalAlignment="Center"/>
+                        <TextBlock Margin="0,16,0,0" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource MutedTextBrush}" FontSize="11"
+                                   Text="{DynamicResource S.Map.Requires}"/>
+                    </StackPanel>
+                </Grid>
+
+            </Grid>
+
+            <!-- Статус-бар -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource PanelBackground}"
+                    BorderBrush="{DynamicResource BorderBrushSoft}"
+                    BorderThickness="0,1,0,0"
+                    Padding="10,5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Статус -->
+                    <TextBlock x:Name="StatusText" Text="{DynamicResource S.Status.Ready}"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               FontSize="12" VerticalAlignment="Center"/>
+
+                    <!-- Индикатор несохранённых изменений -->
+                    <TextBlock x:Name="DirtyIndicator"
+                               Grid.Column="1"
+                               Text="{DynamicResource S.Status.Unsaved}"
+                               Foreground="#F0C040"
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Margin="0,0,12,0"
+                               Opacity="0"
+                               ToolTip="Ctrl+S — сохранить всё"/>
+
+                    <!-- Кнопка поиска -->
+                    <Button Grid.Column="2"
+                            Content="{DynamicResource S.Btn.Search}"
+                            Padding="8,3"
+                            FontSize="11"
+                            Margin="0,0,6,0"
+                            Click="GlobalSearch_Click"
+                            ToolTip="Глобальный поиск (Ctrl+F)"/>
+
+                    <!-- Кнопка валидации -->
+                    <Button Grid.Column="3"
+                            Content="{DynamicResource S.Btn.Check}"
+                            Padding="8,3"
+                            FontSize="11"
+                            Click="Validate_Click"
+                            ToolTip="Проверить все конфиги на ошибки (Ctrl+E)"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

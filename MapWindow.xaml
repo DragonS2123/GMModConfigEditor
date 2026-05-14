@@ -1,0 +1,75 @@
+<Window x:Class="GMCraftTableEditor.MapWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="{DynamicResource S.Map.Title}"
+        Height="780" Width="1280"
+        MinHeight="500" MinWidth="800"
+        Background="#1a1a1a"
+        Foreground="#e0e0e0"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Панель управления -->
+        <Border Background="#1e1e1e" BorderBrush="#333" BorderThickness="0,0,0,1" Padding="10,7">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Выбор карты -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource S.Map.MapLabel}" VerticalAlignment="Center" Margin="0,0,8,0"
+                               Foreground="#888" FontSize="12"/>
+                    <ComboBox x:Name="MapCombo" Width="180" FontSize="12"
+                              SelectionChanged="MapCombo_Changed"/>
+
+                </StackPanel>
+
+                <!-- Маркеры -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
+                    <CheckBox x:Name="ChkNPC"      Content="{DynamicResource S.Map.NPC}"      IsChecked="True" Margin="0,0,12,0"
+                              Checked="Markers_Changed" Unchecked="Markers_Changed"/>
+                    <CheckBox x:Name="ChkTriggers" Content="{DynamicResource S.Map.Triggers}" IsChecked="True" Margin="0,0,12,0"
+                              Checked="Markers_Changed" Unchecked="Markers_Changed"/>
+                    <CheckBox x:Name="ChkRocks"    Content="{DynamicResource S.Map.Rocks}"    IsChecked="True"
+                              Checked="Markers_Changed" Unchecked="Markers_Changed"/>
+                </StackPanel>
+
+                <!-- Перейти к позиции -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource S.Map.X}" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#888"/>
+                    <TextBox x:Name="GotoX" Width="75" Margin="0,0,6,0" Padding="4,3" FontFamily="Consolas"/>
+                    <TextBlock Text="{DynamicResource S.Map.Z}" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#888"/>
+                    <TextBox x:Name="GotoZ" Width="75" Margin="0,0,8,0" Padding="4,3" FontFamily="Consolas"/>
+                    <Button Content="{DynamicResource S.Map.GoTo}" Padding="8,4" Click="GotoPos_Click"/>
+                </StackPanel>
+
+                <!-- Кнопки -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <Button Content="{DynamicResource S.Map.Refresh}" Padding="8,4" Click="RefreshMarkers_Click"/>
+                </StackPanel>
+
+                <!-- Координаты мыши -->
+                <TextBlock x:Name="CoordText" Grid.Column="5"
+                           VerticalAlignment="Center"
+                           Foreground="#7ec8e3"
+                           FontFamily="Consolas" FontSize="12"
+                           Text="{DynamicResource S.Map.Hint}"/>
+            </Grid>
+        </Border>
+
+        <!-- Карта -->
+        <wv2:WebView2 x:Name="MapView" Grid.Row="1"/>
+    </Grid>
+</Window>
